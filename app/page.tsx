@@ -19,6 +19,7 @@ import {
   Legend
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
+import Image from 'next/image'
 
 type GameMode = 
   | 'idle' 
@@ -663,16 +664,18 @@ export default function Game() {
                   <Button
                     key={choice}
                     onClick={() => {
-                      console.log('Choice button clicked:', choice)  // Debug log
-                      console.log('Current state:', state)  // Debug log
+                      console.log('Choice button clicked:', choice)
+                      console.log('Current state:', state)
                       playGame(choice)
                     }}
                     className="w-32 h-32 p-2 bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 rounded-2xl transform hover:scale-110 transition-all"
                     disabled={!!state.playerChoice}
                   >
-                    <img 
+                    <Image 
                       src={choiceEmoji[choice]} 
                       alt={choice}
+                      width={128}
+                      height={128}
                       className="w-full h-full object-contain filter drop-shadow-lg"
                     />
                   </Button>
@@ -689,10 +692,12 @@ export default function Game() {
                   <div className="text-center transform transition-all duration-500">
                     <div className="mb-4 relative">
                       <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full animate-pulse"></div>
-                      <img 
+                      <Image 
                         src="/11.png" 
                         alt="You" 
-                        className="w-20 h-20 mx-auto rounded-full border-4 border-blue-500 relative z-10"
+                        width={80}
+                        height={80}
+                        className="mx-auto rounded-full border-4 border-blue-500 relative z-10"
                       />
                       <p className="text-xl font-bold mt-2 text-blue-400">You</p>
                     </div>
@@ -703,10 +708,12 @@ export default function Game() {
                         state.gameResult === 'win' ? 'animate-winner-kick' : 
                         state.gameResult === 'lose' ? 'animate-loser-kicked' : ''
                       }`}>
-                        <img 
+                        <Image 
                           src={choiceEmoji[state.playerChoice]} 
                           alt={state.playerChoice}
-                          className={`w-48 h-48 object-contain ${
+                          width={192}
+                          height={192}
+                          className={`object-contain ${
                             state.gameMode === 'battling' ? 'animate-battle-shake' : ''
                           }`}
                         />
@@ -747,9 +754,11 @@ export default function Game() {
                   <div className="text-center transform transition-all duration-500">
                     <div className="mb-4 relative">
                       <div className="absolute inset-0 bg-red-500/20 blur-xl rounded-full animate-pulse"></div>
-                      <img 
+                      <Image 
                         src="/10.png" 
                         alt={state.opponent || 'Bot'} 
+                        width={80}
+                        height={80}
                         className="w-20 h-20 mx-auto rounded-full border-4 border-red-500 relative z-10"
                       />
                       <p className="text-xl font-bold mt-2 text-red-400">
@@ -763,10 +772,12 @@ export default function Game() {
                         state.gameResult === 'lose' ? 'animate-winner-kick' : 
                         state.gameResult === 'win' ? 'animate-loser-kicked' : ''
                       }`}>
-                        <img 
+                        <Image 
                           src={choiceEmoji[state.botChoice]} 
                           alt={state.botChoice}
-                          className={`w-48 h-48 object-contain ${
+                          width={192}
+                          height={192}
+                          className={`object-contain ${
                             state.gameMode === 'battling' ? 'animate-battle-shake' : ''
                           }`}
                         />

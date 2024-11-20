@@ -7,7 +7,7 @@ interface ToastProps {
   variant?: "default" | "destructive"
 }
 
-export function toast({ title, description, variant = "default" }: ToastProps) {
+export function toast({ title, description }: ToastProps) {
   // Simple toast implementation
   console.log(`Toast: ${title} - ${description}`)
 } 
