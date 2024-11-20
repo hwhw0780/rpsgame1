@@ -180,23 +180,36 @@ export default function Game() {
   const [state, setState] = useState<GameState>(initialState)
 
   useEffect(() => {
-    // Check if user is logged in
-    const user = localStorage.getItem('user')
-    if (!user) {
-      // Redirect to login if not logged in
-      window.location.href = '/login'
-      return
-    }
+    // Check if we're in the browser
+    if (typeof window !== 'undefined') {
+      // Check if user is logged in
+      const user = localStorage.getItem('user')
+      if (!user) {
+        window.location.href = '/login'
+        return
+      }
 
-    // Initialize game state with user data
-    const userData = JSON.parse(user)
-    setState(prev => ({
-      ...prev,
-      balancePoints: userData.balancePoints,
-      playablePoints: userData.playablePoints,
-      withdrawablePoints: userData.withdrawablePoints
-    }))
+      // Initialize game state with user data
+      const userData = JSON.parse(user)
+      setState(prev => ({
+        ...prev,
+        balancePoints: userData.balancePoints,
+        playablePoints: userData.playablePoints,
+        withdrawablePoints: userData.withdrawablePoints
+      }))
+    }
   }, [])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('balancePoints', state.balancePoints.toString())
+      localStorage.setItem('playablePoints', state.playablePoints.toString())
+      localStorage.setItem('gamesPlayed', state.gamesPlayed.toString())
+      localStorage.setItem('lastResetDate', state.lastResetDate)
+      localStorage.setItem('dailyTurnover', state.dailyTurnover.toString())
+    }
+  }, [state.balancePoints, state.playablePoints, state.gamesPlayed, 
+      state.lastResetDate, state.dailyTurnover])
 
   useEffect(() => {
     const today = new Date().toDateString()
@@ -212,15 +225,6 @@ export default function Game() {
       }))
     }
   }, [state.lastResetDate])
-
-  useEffect(() => {
-    localStorage.setItem('balancePoints', state.balancePoints.toString())
-    localStorage.setItem('playablePoints', state.playablePoints.toString())
-    localStorage.setItem('gamesPlayed', state.gamesPlayed.toString())
-    localStorage.setItem('lastResetDate', state.lastResetDate)
-    localStorage.setItem('dailyTurnover', state.dailyTurnover.toString())
-  }, [state.balancePoints, state.playablePoints, state.gamesPlayed, 
-      state.lastResetDate, state.dailyTurnover])
 
   useEffect(() => {
     const interval = setInterval(() => {
