@@ -214,7 +214,6 @@ export default function Game() {
   const [state, setState] = useState<GameState>(initialState)
 
   useEffect(() => {
-    // Check if we're in the browser
     if (typeof window !== 'undefined') {
       // Check if user is logged in
       const user = localStorage.getItem('user')
@@ -242,8 +241,7 @@ export default function Game() {
       localStorage.setItem('lastResetDate', state.lastResetDate)
       localStorage.setItem('dailyTurnover', state.dailyTurnover.toString())
     }
-  }, [state.balancePoints, state.playablePoints, state.gamesPlayed, 
-      state.lastResetDate, state.dailyTurnover])
+  }, [state.balancePoints, state.playablePoints, state.gamesPlayed, state.lastResetDate, state.dailyTurnover])
 
   useEffect(() => {
     const today = new Date().toDateString()
@@ -1323,7 +1321,10 @@ export default function Game() {
             <div className="mt-8 pt-4 border-t border-white/10">
               <div className="flex items-center justify-between">
                 <div className="text-white/80 font-semibold">
-                  Welcome, {JSON.parse(localStorage.getItem('user') || '{}').username}
+                  Welcome, {typeof window !== 'undefined' ? 
+                    JSON.parse(localStorage.getItem('user') || '{}').username || 'User' : 
+                    'User'
+                  }
                 </div>
                 <div className="flex gap-2">
                   <Button 
