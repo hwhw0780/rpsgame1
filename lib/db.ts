@@ -25,4 +25,5 @@ export async function getLeaderboard() {
       username: true,
       balancePoints: true
     }
-  }) 
+  })
+} 
