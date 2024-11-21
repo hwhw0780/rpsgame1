@@ -20,6 +20,7 @@ import {
 } from 'chart.js'
 import { Line } from 'react-chartjs-2'
 import Image from 'next/image'
+import { generateRandomUsername } from '@/utils/nameGenerator'
 
 type GameMode = 
   | 'idle' 
@@ -32,6 +33,8 @@ type GameMode =
   | 'depositing'
   | 'pvp_queuing'
   | 'changing_password'
+  | 'balance_depositing'
+  | 'staking'
 type Choice = 'rock' | 'paper' | 'scissors'
 type GameResult = 'win' | 'lose' | 'draw' | null
 type BetType = 'win_loss' | 'draw'
@@ -45,18 +48,6 @@ const choiceEmoji: Record<Choice, string> = {
 
 const choices: Choice[] = ['rock', 'paper', 'scissors']
 const maxGamesPerDay = 50
-
-const randomUsernames = [
-  "CryptoKing", "LuckyPlayer", "ProGamer123", "RichieRich", 
-  "WinMaster", "FortuneSeeker", "CoinHunter", "LuckyDragon",
-  "GoldRush", "DiamondHands", "MoonShot", "StarPlayer",
-  "VictoryRoyal", "ChampionX", "TopDog", "EliteGamer",
-  "AcePlayer", "RocketMan", "NinjaTrader", "BullRunner"
-]
-
-const getRandomUsername = () => {
-  return randomUsernames[Math.floor(Math.random() * randomUsernames.length)]
-}
 
 const getRandomQueueTime = () => {
   return Math.floor(Math.random() * 26) + 5 // Random time between 5-30 seconds
@@ -89,6 +80,13 @@ interface GameState {
   stakingOption: number | null
   stakingAmount: number
   showStakingModal: boolean
+  selectedCurrency: 'CNY' | 'CAD' | 'AUD' | 'MYR'
+  currencyRates: {
+    CNY: { rate: number, history: { time: string; rate: number }[] }
+    CAD: { rate: number, history: { time: string; rate: number }[] }
+    AUD: { rate: number, history: { time: string; rate: number }[] }
+    MYR: { rate: number, history: { time: string; rate: number }[] }
+  }
 }
 
 const getRandomChoice = (): Choice => {
@@ -137,6 +135,11 @@ ChartJS.register(
   Legend
 )
 
+// Replace the existing getRandomUsername function
+const getRandomUsername = () => {
+  return generateRandomUsername()
+}
+
 export default function Game() {
   const initialState: GameState = {
     balancePoints: 40000,
@@ -174,7 +177,38 @@ export default function Game() {
     showContactSupport: false,
     stakingOption: null,
     stakingAmount: 0,
-    showStakingModal: false
+    showStakingModal: false,
+    selectedCurrency: 'CNY',
+    currencyRates: {
+      CNY: {
+        rate: 7.23,
+        history: Array.from({ length: 10 }, (_, i) => ({
+          time: new Date(Date.now() - i * 30000).toLocaleTimeString(),
+          rate: 7.23 + (Math.random() * 0.1 - 0.05)
+        })).reverse()
+      },
+      CAD: {
+        rate: 1.35,
+        history: Array.from({ length: 10 }, (_, i) => ({
+          time: new Date(Date.now() - i * 30000).toLocaleTimeString(),
+          rate: 1.35 + (Math.random() * 0.1 - 0.05)
+        })).reverse()
+      },
+      AUD: {
+        rate: 1.52,
+        history: Array.from({ length: 10 }, (_, i) => ({
+          time: new Date(Date.now() - i * 30000).toLocaleTimeString(),
+          rate: 1.52 + (Math.random() * 0.1 - 0.05)
+        })).reverse()
+      },
+      MYR: {
+        rate: 4.72,
+        history: Array.from({ length: 10 }, (_, i) => ({
+          time: new Date(Date.now() - i * 30000).toLocaleTimeString(),
+          rate: 4.72 + (Math.random() * 0.1 - 0.05)
+        })).reverse()
+      }
+    }
   }
 
   const [state, setState] = useState<GameState>(initialState)
@@ -247,15 +281,39 @@ export default function Game() {
   useEffect(() => {
     const interval = setInterval(() => {
       setState(prev => {
-        const newRate = prev.usdMyrRate + (Math.random() * 0.02 - 0.01)
-        const newHistory = [...prev.rateHistory.slice(1), {
-          time: new Date().toLocaleTimeString(),
-          rate: newRate
-        }]
+        const newRates = {
+          CNY: {
+            rate: prev.currencyRates.CNY.rate + (Math.random() * 0.02 - 0.01),
+            history: [...prev.currencyRates.CNY.history.slice(1), {
+              time: new Date().toLocaleTimeString(),
+              rate: prev.currencyRates.CNY.rate + (Math.random() * 0.02 - 0.01)
+            }]
+          },
+          CAD: {
+            rate: prev.currencyRates.CAD.rate + (Math.random() * 0.02 - 0.01),
+            history: [...prev.currencyRates.CAD.history.slice(1), {
+              time: new Date().toLocaleTimeString(),
+              rate: prev.currencyRates.CAD.rate + (Math.random() * 0.02 - 0.01)
+            }]
+          },
+          AUD: {
+            rate: prev.currencyRates.AUD.rate + (Math.random() * 0.02 - 0.01),
+            history: [...prev.currencyRates.AUD.history.slice(1), {
+              time: new Date().toLocaleTimeString(),
+              rate: prev.currencyRates.AUD.rate + (Math.random() * 0.02 - 0.01)
+            }]
+          },
+          MYR: {
+            rate: prev.currencyRates.MYR.rate + (Math.random() * 0.02 - 0.01),
+            history: [...prev.currencyRates.MYR.history.slice(1), {
+              time: new Date().toLocaleTimeString(),
+              rate: prev.currencyRates.MYR.rate + (Math.random() * 0.02 - 0.01)
+            }]
+          }
+        }
         return {
           ...prev,
-          usdMyrRate: newRate,
-          rateHistory: newHistory
+          currencyRates: newRates
         }
       })
     }, 3000) // Update every 3 seconds
@@ -424,13 +482,15 @@ export default function Game() {
   }
 
   const handleDeposit = () => {
-    const maxDeposit = Math.floor(state.balancePoints * 0.05) // 5% of balance points
-    
-    setState(prev => ({
-      ...prev,
-      gameMode: 'depositing',
-      result: `You can deposit up to ${maxDeposit} points (5% of balance)`
-    }))
+    console.log('handleDeposit clicked')
+    setState(prev => {
+      console.log('Setting state for USDT deposit, current state:', prev)
+      return {
+        ...prev,
+        gameMode: 'depositing',
+        depositAmount: 0
+      }
+    })
   }
 
   const processDeposit = (amount: number) => {
@@ -459,6 +519,32 @@ export default function Game() {
     })
   }
 
+  // Add this function to handle deposit from balance points
+  const handleBalanceToPlayable = () => {
+    console.log('handleBalanceToPlayable clicked')
+    const maxDeposit = Math.floor(state.balancePoints * 0.05)
+    console.log('maxDeposit:', maxDeposit)
+    
+    setState(prev => {
+      console.log('Setting state for balance deposit, current state:', prev)
+      return {
+        ...prev,
+        gameMode: 'balance_depositing',
+        depositAmount: 0
+      }
+    })
+  }
+
+  // Add handleStake function after handleBalanceToPlayable
+  const handleStake = () => {
+    setState(prev => ({
+      ...prev,
+      gameMode: 'staking',
+      stakingAmount: 0,
+      stakingOption: null
+    }))
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-8">
       <div className="flex gap-8 justify-center">
@@ -483,21 +569,35 @@ export default function Game() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-300">USDT in MYR:</span>
+                <span className="text-gray-300">USDT in {state.selectedCurrency}:</span>
                 <span className="text-2xl font-bold text-blue-400">
-                  {((state.balancePoints / 18) * state.usdMyrRate).toFixed(2)} MYR
+                  {((state.balancePoints / 18) * state.currencyRates[state.selectedCurrency].rate).toFixed(2)} {state.selectedCurrency}
                 </span>
+              </div>
+              
+              {/* Currency Selection Buttons */}
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                {(['CNY', 'CAD', 'AUD', 'MYR'] as const).map((currency) => (
+                  <Button
+                    key={currency}
+                    onClick={() => setState(prev => ({ ...prev, selectedCurrency: currency }))}
+                    variant={state.selectedCurrency === currency ? "default" : "outline"}
+                    className={state.selectedCurrency === currency ? "bg-blue-500" : ""}
+                  >
+                    {currency}
+                  </Button>
+                ))}
               </div>
             </div>
 
             <div className="h-[200px] bg-black/20 p-4 rounded-lg">
               <Line
                 data={{
-                  labels: state.rateHistory.map(item => item.time),
+                  labels: state.currencyRates[state.selectedCurrency].history.map(item => item.time),
                   datasets: [
                     {
-                      label: 'USD/MYR',
-                      data: state.rateHistory.map(item => item.rate),
+                      label: `USDT/${state.selectedCurrency}`,
+                      data: state.currencyRates[state.selectedCurrency].history.map(item => item.rate),
                       borderColor: '#4ade80',
                       tension: 0.1,
                     },
@@ -527,7 +627,10 @@ export default function Game() {
 
             <div className="grid grid-cols-3 gap-4">
               <Button 
-                onClick={() => handleDeposit()}
+                onClick={() => {
+                  console.log('Deposit button clicked')
+                  handleDeposit()
+                }}
                 className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
               >
                 Deposit
@@ -539,7 +642,7 @@ export default function Game() {
                 Withdraw
               </Button>
               <Button 
-                onClick={() => setState(prev => ({ ...prev, showStakingModal: true }))}
+                onClick={() => setState(prev => ({ ...prev, gameMode: 'staking' }))}
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
               >
                 Stake
@@ -562,7 +665,10 @@ export default function Game() {
                 <p className="text-sm text-gray-300">Playable Points</p>
                 <p className="text-2xl font-bold text-green-400">{state.playablePoints}</p>
                 <Button
-                  onClick={handleDeposit}
+                  onClick={() => {
+                    console.log('+ button clicked')
+                    handleBalanceToPlayable()
+                  }}
                   className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-green-500 hover:bg-green-600 p-0 text-white font-bold"
                 >
                   +
@@ -897,11 +1003,81 @@ export default function Game() {
               </div>
             )}
 
+            {state.gameMode === 'balance_depositing' && (
+              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+                <div className="bg-gradient-to-b from-gray-900 to-gray-800 p-8 rounded-2xl border border-white/20 shadow-xl max-w-md w-full mx-4">
+                  <div className="text-center space-y-6">
+                    <h2 className="text-2xl font-bold text-white">Deposit from Balance</h2>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-gray-200">Deposit Amount</Label>
+                        <Input
+                          type="number"
+                          value={state.depositAmount || ''}
+                          onChange={(e) => setState(prev => ({
+                            ...prev,
+                            depositAmount: Math.max(0, parseFloat(e.target.value) || 0)
+                          }))}
+                          className="bg-white/10 border-white/20 text-white"
+                          placeholder="Enter amount to deposit"
+                        />
+                        <p className="text-sm text-gray-400 text-left">
+                          Maximum deposit: {Math.floor(state.balancePoints * 0.05)} points (5% of balance)
+                        </p>
+                      </div>
+
+                      <Button
+                        onClick={() => {
+                          const maxDeposit = Math.floor(state.balancePoints * 0.05)
+                          if (state.depositAmount <= 0 || state.depositAmount > maxDeposit) {
+                            toast({
+                              title: "Invalid deposit amount",
+                              description: `Please enter an amount between 1 and ${maxDeposit} points.`
+                            })
+                            return
+                          }
+
+                          setState(prev => ({
+                            ...prev,
+                            balancePoints: prev.balancePoints - prev.depositAmount,
+                            playablePoints: prev.playablePoints + prev.depositAmount,
+                            gameMode: 'idle',
+                            depositAmount: 0
+                          }))
+
+                          toast({
+                            title: "Deposit Successful",
+                            description: `Deposited ${state.depositAmount} points to playable balance.`
+                          })
+                        }}
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-4 text-lg font-bold"
+                      >
+                        Confirm Deposit
+                      </Button>
+                      
+                      <Button
+                        onClick={() => setState(prev => ({ 
+                          ...prev, 
+                          gameMode: 'idle',
+                          depositAmount: 0
+                        }))}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {state.gameMode === 'depositing' && (
               <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
                 <div className="bg-gradient-to-b from-gray-900 to-gray-800 p-8 rounded-2xl border border-white/20 shadow-xl max-w-md w-full mx-4">
                   <div className="text-center space-y-6">
-                    <h2 className="text-2xl font-bold text-white">Deposit to Balance</h2>
+                    <h2 className="text-2xl font-bold text-white">Deposit USDT</h2>
                     
                     <div className="space-y-4">
                       {/* Crypto Address */}
@@ -947,51 +1123,17 @@ export default function Game() {
                         </p>
                       </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex flex-col gap-3 pt-4">
-                        <Button
-                          onClick={() => {
-                            // Here you would typically integrate with your payment system
-                            toast({
-                              title: "Deposit Request Sent",
-                              description: "Please contact customer service to confirm your deposit."
-                            })
-                          }}
-                          className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-4 text-lg font-bold"
-                        >
-                          Submit Deposit Request
-                        </Button>
-                        
-                        <Button
-                          onClick={() => setState(prev => ({ 
-                            ...prev, 
-                            showContactSupport: true 
-                          }))}
-                          variant="outline"
-                          className="w-full"
-                        >
-                          Contact Customer Service
-                        </Button>
-                        
-                        <Button
-                          onClick={() => setState(prev => ({ 
-                            ...prev, 
-                            gameMode: 'idle',
-                            depositAmount: 0
-                          }))}
-                          variant="outline"
-                          className="w-full bg-red-500/10 hover:bg-red-500/20"
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-
-                      {/* Notes */}
-                      <div className="text-sm text-gray-400 text-left space-y-1">
-                        <p>• Minimum deposit: 10 USDT</p>
-                        <p>• Only send USDT (BEP20) to this address</p>
-                        <p>• Contact customer service after making deposit</p>
-                      </div>
+                      <Button
+                        onClick={() => setState(prev => ({ 
+                          ...prev, 
+                          gameMode: 'idle',
+                          depositAmount: 0
+                        }))}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        Cancel
+                      </Button>
                     </div>
                   </div>
                 </div>
