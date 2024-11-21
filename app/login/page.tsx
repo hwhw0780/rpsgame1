@@ -7,8 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
-import { MOCK_USERS } from '@/constants/users'
-import { User } from '@/types'
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 export default function Login() {
   const router = useRouter()
@@ -17,64 +17,36 @@ export default function Login() {
     password: ''
   })
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    console.log('Login attempt:', formData) // Debug log
-    
-    // First, check for admin credentials
-    if (formData.username === 'admin' && formData.password === 'admin123') {
-      const adminUser = {
-        id: '2',
-        username: 'admin',
-        password: 'admin123',
-        role: 'admin',
-        balancePoints: 0,
-        playablePoints: 0,
-        withdrawablePoints: 0,
-        createdAt: new Date(),
-        lastLogin: new Date()
-      }
-      
-      localStorage.setItem('user', JSON.stringify(adminUser))
-      localStorage.setItem('users', JSON.stringify(MOCK_USERS)) // Initialize users list
-      
-      toast({
-        title: "Login Successful",
-        description: "Welcome back, Admin!"
+    try {
+      const user = await prisma.user.findUnique({
+        where: { username: formData.username }
       })
 
-      router.push('/admin')
-      return
-    }
+      if (!user || !await bcrypt.compare(formData.password, user.password)) {
+        toast({
+          title: "Login Failed",
+          description: "Invalid username or password"
+        })
+        return
+      }
 
-    // Get users from localStorage or use MOCK_USERS
-    const storedUsers = localStorage.getItem('users')
-    const users = storedUsers ? JSON.parse(storedUsers) : MOCK_USERS
-    
-    console.log('Available users:', users) // Debug log
-
-    // Find user with matching credentials
-    const user = users.find((u: User) => 
-      u.username === formData.username && 
-      u.password === formData.password
-    )
-
-    console.log('Found user:', user) // Debug log
-
-    if (user) {
-      localStorage.setItem('user', JSON.stringify(user))
+      const { password, ...userData } = user
+      localStorage.setItem('user', JSON.stringify(userData))
       
       toast({
         title: "Login Successful",
         description: `Welcome back, ${user.username}!`
       })
 
-      router.push('/')
-    } else {
+      router.push(user.role === 'admin' ? '/admin' : '/')
+    } catch (error) {
+      console.error('Login error:', error)
       toast({
-        title: "Login Failed",
-        description: "Invalid username or password"
+        title: "Error",
+        description: "An error occurred during login"
       })
     }
   }

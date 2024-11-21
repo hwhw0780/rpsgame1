@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
 import { User } from "@/types"
 import { MOCK_USERS } from '@/constants/users'
+import bcrypt from 'bcryptjs'
+import { prisma } from '@/lib/prisma'
 
 // Add new interface for user creation
 interface CreateUserForm {
@@ -118,54 +120,36 @@ export default function AdminDashboard() {
   )
 
   // Add create user function
-  const handleCreateUser = () => {
-    // Validate form
-    if (!createUserForm.username || !createUserForm.password || !createUserForm.referralCode) {
+  const handleCreateUser = async () => {
+    try {
+      const hashedPassword = await bcrypt.hash(createUserForm.password, 10)
+      
+      const newUser = await prisma.user.create({
+        data: {
+          username: createUserForm.username,
+          password: hashedPassword,
+          role: 'user'
+        }
+      })
+
+      toast({
+        title: "Success",
+        description: `User ${newUser.username} created successfully`
+      })
+
+      setCreateUserForm({
+        username: '',
+        password: '',
+        referralCode: ''
+      })
+      setShowCreateUser(false)
+    } catch (error) {
+      console.error('Error creating user:', error)
       toast({
         title: "Error",
-        description: "All fields are required",
-        variant: "destructive"
+        description: "Failed to create user"
       })
-      return
     }
-
-    // Check if username already exists
-    if (users.some(user => user.username === createUserForm.username)) {
-      toast({
-        title: "Error",
-        description: "Username already exists",
-        variant: "destructive"
-      })
-      return
-    }
-
-    // Create new user
-    const newUser: User = {
-      id: (users.length + 1).toString(),
-      username: createUserForm.username,
-      password: createUserForm.password,
-      role: 'user',
-      balancePoints: 0,
-      playablePoints: 0,
-      withdrawablePoints: 0,
-      createdAt: new Date(),
-      lastLogin: new Date()
-    }
-
-    setUsers(prev => [...prev, newUser])
-    
-    toast({
-      title: "Success",
-      description: `User ${createUserForm.username} created successfully`
-    })
-
-    // Reset form and close modal
-    setCreateUserForm({
-      username: '',
-      password: '',
-      referralCode: ''
-    })
-    setShowCreateUser(false)
   }
 
   return (

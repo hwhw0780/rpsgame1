@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  username          String   @unique
+  password          String
+  role              String   @default("user")
+  balancePoints     Int      @default(40000)
+  playablePoints    Int      @default(10000)
+  withdrawablePoints Int      @default(0)
+  createdAt         DateTime @default(now())
+  lastLogin         DateTime @default(now())
+  stakingRecords    StakingRecord[]
+  transactions      Transaction[]
+  gameHistory       GameHistory[]
+}
+
+model StakingRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  amount      Int
+  duration    Int      // in days
+  startDate   DateTime @default(now())
+  endDate     DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // deposit, withdraw, stake, unstake
+  amount      Int
+  status      String   // pending, completed, failed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GameHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  gameType    String   // pvp, pvb
+  betAmount   Int
+  result      String   // win, lose, draw
+  createdAt   DateTime @default(now())
+} 
