@@ -16,7 +16,8 @@ export default function Login() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    referralCode: ''
   })
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -123,7 +124,8 @@ export default function Login() {
       setFormData({
         username: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        referralCode: ''
       })
 
     } catch (error) {
@@ -176,20 +178,36 @@ export default function Login() {
             </div>
 
             {isRegistering && (
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-gray-200">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev,
-                    confirmPassword: e.target.value
-                  }))}
-                  className="bg-white/10 border-white/20 text-white"
-                  required
-                />
-              </div>
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-gray-200">Confirm Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      confirmPassword: e.target.value
+                    }))}
+                    className="bg-white/10 border-white/20 text-white"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="referralCode" className="text-gray-200">Referral Code</Label>
+                  <Input
+                    id="referralCode"
+                    type="text"
+                    value={formData.referralCode}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      referralCode: e.target.value
+                    }))}
+                    className="bg-white/10 border-white/20 text-white"
+                    required
+                  />
+                </div>
+              </>
             )}
 
             <Button 
@@ -207,7 +225,8 @@ export default function Login() {
                 setFormData({
                   username: '',
                   password: '',
-                  confirmPassword: ''
+                  confirmPassword: '',
+                  referralCode: ''
                 })
               }}
               className="w-full text-gray-300 hover:text-white"

@@ -122,21 +122,41 @@ export default function AdminDashboard() {
   // Add create user function
   const handleCreateUser = async () => {
     try {
+      console.log('Creating user:', createUserForm) // Debug log
+
+      // Validate inputs
+      if (!createUserForm.username || !createUserForm.password) {
+        toast({
+          title: "Error",
+          description: "Please fill in all required fields",
+          variant: "destructive"
+        })
+        return
+      }
+
       const hashedPassword = await bcrypt.hash(createUserForm.password, 10)
       
       const newUser = await prisma.user.create({
         data: {
           username: createUserForm.username,
           password: hashedPassword,
-          role: 'user'
+          role: 'user',
+          balancePoints: 40000,
+          playablePoints: 10000,
+          withdrawablePoints: 0,
+          referralCode: createUserForm.referralCode
         }
       })
+
+      // Update local state
+      setUsers(prev => [...prev, newUser])
 
       toast({
         title: "Success",
         description: `User ${newUser.username} created successfully`
       })
 
+      // Reset form
       setCreateUserForm({
         username: '',
         password: '',
@@ -147,7 +167,7 @@ export default function AdminDashboard() {
       console.error('Error creating user:', error)
       toast({
         title: "Error",
-        description: "Failed to create user"
+        description: "Failed to create user. Please try again."
       })
     }
   }
