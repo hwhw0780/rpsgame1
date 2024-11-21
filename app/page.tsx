@@ -544,9 +544,9 @@ export default function Game() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-8">
-      <div className="flex gap-8 justify-center">
-        <Card className="w-[400px] bg-white/10 backdrop-blur-lg border-white/20">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4 md:p-8">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8 justify-center">
+        <Card className="w-full md:w-[400px] bg-white/10 backdrop-blur-lg border-white/20">
           <CardHeader>
             <CardTitle className="text-center text-2xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 text-transparent bg-clip-text">
               Finance Center
@@ -574,13 +574,13 @@ export default function Game() {
               </div>
               
               {/* Currency Selection Buttons */}
-              <div className="grid grid-cols-4 gap-2 mt-2">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
                 {(['CNY', 'CAD', 'AUD', 'MYR'] as const).map((currency) => (
                   <Button
                     key={currency}
                     onClick={() => setState(prev => ({ ...prev, selectedCurrency: currency }))}
                     variant={state.selectedCurrency === currency ? "default" : "outline"}
-                    className={state.selectedCurrency === currency ? "bg-blue-500" : ""}
+                    className={`text-sm md:text-base ${state.selectedCurrency === currency ? "bg-blue-500" : ""}`}
                   >
                     {currency}
                   </Button>
@@ -588,7 +588,7 @@ export default function Game() {
               </div>
             </div>
 
-            <div className="h-[200px] bg-black/20 p-4 rounded-lg">
+            <div className="h-[150px] md:h-[200px] bg-black/20 p-2 md:p-4 rounded-lg">
               <Line
                 data={{
                   labels: state.currencyRates[state.selectedCurrency].history.map(item => item.time),
@@ -623,7 +623,7 @@ export default function Game() {
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-4">
               <Button 
                 onClick={() => {
                   console.log('Deposit button clicked')
@@ -649,12 +649,12 @@ export default function Game() {
           </CardContent>
         </Card>
 
-        <Card className="w-[600px] bg-white/10 backdrop-blur-lg border-white/20">
+        <Card className="w-full md:w-[600px] bg-white/10 backdrop-blur-lg border-white/20">
           <CardHeader className="space-y-4">
-            <CardTitle className="text-center text-4xl font-bold bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-transparent bg-clip-text">
+            <CardTitle className="text-center text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-transparent bg-clip-text">
               Rock Paper Scissors
             </CardTitle>
-            <div className="grid grid-cols-3 gap-4 p-4 rounded-lg bg-black/20">
+            <div className="grid grid-cols-3 gap-2 md:gap-4 p-2 md:p-4 rounded-lg bg-black/20">
               <div className="text-center p-3 rounded-lg bg-white/10 backdrop-blur">
                 <p className="text-sm text-gray-300">Balance Points</p>
                 <p className="text-2xl font-bold text-yellow-400">{state.balancePoints}</p>
@@ -682,7 +682,7 @@ export default function Game() {
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 md:space-y-6">
             {state.gameMode === 'idle' && (
               <div className="flex flex-col space-y-3">
                 <Button 
@@ -1002,8 +1002,8 @@ export default function Game() {
             )}
 
             {state.gameMode === 'balance_depositing' && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-                <div className="bg-gradient-to-b from-gray-900 to-gray-800 p-8 rounded-2xl border border-white/20 shadow-xl max-w-md w-full mx-4">
+              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-gradient-to-b from-gray-900 to-gray-800 p-4 md:p-8 rounded-2xl border border-white/20 shadow-xl w-full max-w-md">
                   <div className="text-center space-y-6">
                     <h2 className="text-2xl font-bold text-white">Deposit from Balance</h2>
                     
