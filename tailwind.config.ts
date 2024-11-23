@@ -47,6 +47,14 @@ export default {
           '30%, 70%': { opacity: '1' },
           '40%, 60%': { opacity: '0' },
           '50%': { opacity: '1' }
+        },
+        'flip': {
+          '0%, 100%': { transform: 'rotateY(0deg)' },
+          '50%': { transform: 'rotateY(180deg)' }
+        },
+        'scroll': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' }
         }
       },
       animation: {
@@ -55,7 +63,9 @@ export default {
         'battle-hover': 'battle-hover 2s ease-in-out infinite',
         'battle-shake': 'battle-shake 0.5s ease-in-out infinite',
         'vs-pulse': 'vs-pulse 1.5s ease-in-out infinite',
-        'lightning': 'lightning 2s ease-in-out infinite'
+        'lightning': 'lightning 2s ease-in-out infinite',
+        'flip': 'flip 3s ease-in-out infinite',
+        'scroll': 'scroll 20s linear infinite'
       }
     },
   },

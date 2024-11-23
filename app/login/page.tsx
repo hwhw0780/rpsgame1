@@ -7,8 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
 
 export default function Login() {
   const router = useRouter()
@@ -24,50 +22,35 @@ export default function Login() {
     e.preventDefault()
     
     try {
-      if (formData.username === 'admin' && formData.password === 'admin123') {
-        const adminUser = {
-          id: 'admin',
-          username: 'admin',
-          role: 'admin',
-          balancePoints: 0,
-          playablePoints: 0,
-          withdrawablePoints: 0,
-          createdAt: new Date(),
-          lastLogin: new Date()
-        }
-        
-        localStorage.setItem('user', JSON.stringify(adminUser))
-        
-        toast({
-          title: "Login Successful",
-          description: "Welcome back, Admin!"
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password
         })
-
-        router.push('/admin')
-        return
-      }
-
-      const user = await prisma.user.findUnique({
-        where: { username: formData.username }
       })
 
-      if (!user || !await bcrypt.compare(formData.password, user.password)) {
+      const data = await response.json()
+
+      if (!response.ok) {
         toast({
           title: "Login Failed",
-          description: "Invalid username or password"
+          description: data.error || "Invalid username or password"
         })
         return
       }
 
-      const { password, ...userData } = user
-      localStorage.setItem('user', JSON.stringify(userData))
+      localStorage.setItem('user', JSON.stringify(data.user))
       
       toast({
         title: "Login Successful",
-        description: `Welcome back, ${user.username}!`
+        description: `Welcome back, ${data.user.username}!`
       })
 
-      router.push('/')
+      router.push(data.user.role === 'admin' ? '/admin' : '/')
     } catch (error) {
       console.error('Login error:', error)
       toast({
@@ -90,30 +73,27 @@ export default function Login() {
         return
       }
 
-      const existingUser = await prisma.user.findUnique({
-        where: { username: formData.username }
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+          referralCode: formData.referralCode
+        })
       })
 
-      if (existingUser) {
+      const data = await response.json()
+
+      if (!response.ok) {
         toast({
-          title: "Error",
-          description: "Username already exists",
-          variant: "destructive"
+          title: "Registration Failed",
+          description: data.error || "Failed to register"
         })
         return
       }
-
-      const hashedPassword = await bcrypt.hash(formData.password, 10)
-      const newUser = await prisma.user.create({
-        data: {
-          username: formData.username,
-          password: hashedPassword,
-          role: 'user',
-          balancePoints: 40000,
-          playablePoints: 10000,
-          withdrawablePoints: 0
-        }
-      })
 
       toast({
         title: "Registration Successful",

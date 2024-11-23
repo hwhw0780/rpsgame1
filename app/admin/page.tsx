@@ -8,6 +8,16 @@ import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
 import { prisma } from '@/lib/prisma'
 
+interface UserData {
+  username: string
+  password: string
+  role?: string
+  balancePoints?: number
+  playablePoints?: number
+  withdrawablePoints?: number
+  referralCode?: string
+}
+
 export default function AdminDashboard() {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
@@ -35,7 +45,7 @@ export default function AdminDashboard() {
   }
 
   // Create new user
-  const handleCreateUser = async (userData) => {
+  const handleCreateUser = async (userData: UserData) => {
     try {
       const response = await fetch('/api/users', {
         method: 'POST',

@@ -12,9 +12,9 @@ model User {
   username          String   @unique
   password          String
   role              String   @default("user")
-  balancePoints     Int      @default(40000)
-  playablePoints    Int      @default(10000)
-  withdrawablePoints Int      @default(0)
+  rpsCoins          Int      @default(40000)
+  stakingRPS        Int      @default(10000)
+  usdtBalance       Int      @default(0)
   referralCode      String?
   createdAt         DateTime @default(now())
   lastLogin         DateTime @default(now())
