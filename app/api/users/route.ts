@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
 
 export async function GET() {
   try {
@@ -9,33 +8,12 @@ export async function GET() {
         id: true,
         username: true,
         role: true,
-        balancePoints: true,
-        playablePoints: true,
-        withdrawablePoints: true,
         createdAt: true,
-        lastLogin: true
+        updatedAt: true
       }
     })
     return NextResponse.json(users)
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    const data = await request.json()
-    const hashedPassword = await bcrypt.hash(data.password, 10)
-
-    const user = await prisma.user.create({
-      data: {
-        ...data,
-        password: hashedPassword
-      }
-    })
-
-    return NextResponse.json(user)
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
+    return NextResponse.json({ error: 'Error fetching users' }, { status: 500 })
   }
 } 
