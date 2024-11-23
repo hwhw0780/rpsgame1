@@ -8,8 +8,7 @@ export async function GET() {
         id: true,
         username: true,
         role: true,
-        createdAt: true,
-        updatedAt: true
+        createdAt: true
       }
     })
     return NextResponse.json(users)
