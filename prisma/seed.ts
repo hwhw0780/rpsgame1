@@ -1,50 +1,49 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
+
 const prisma = new PrismaClient()
 
 async function main() {
-  const userData1: Prisma.UserCreateInput = {
-    username: 'testuser1',
-    password: 'password123',
-    role: 'user',
-    rpsCoins: 10000,
-    stakingRPS: 0,
-    usdtBalance: 100.0,
-    eRPS: 5000,
-    withdrawableERPS: 0,
-    lastLogin: new Date(),
-    stakingRecords: { create: [] },
-    transactions: { create: [] },
-    gameHistories: { create: [] }
+  try {
+    console.log('Starting seed...')
+
+    // Create admin user
+    const adminPassword = await bcrypt.hash('admin123', 10)
+    const admin = await prisma.user.upsert({
+      where: { username: 'admin' },
+      update: {},
+      create: {
+        username: 'admin',
+        password: adminPassword,
+        role: 'admin',
+        balancePoints: 0,
+        playablePoints: 0,
+        withdrawablePoints: 0
+      },
+    })
+    console.log('Created admin user:', admin.username)
+
+    // Create test user
+    const userPassword = await bcrypt.hash('password123', 10)
+    const user = await prisma.user.upsert({
+      where: { username: 'user1' },
+      update: {},
+      create: {
+        username: 'user1',
+        password: userPassword,
+        role: 'user',
+        balancePoints: 40000,
+        playablePoints: 10000,
+        withdrawablePoints: 0
+      },
+    })
+    console.log('Created test user:', user.username)
+
+    console.log('Seed completed successfully')
+  } catch (error) {
+    console.error('Error during seed:', error)
+    throw error
   }
-
-  const userData2: Prisma.UserCreateInput = {
-    username: 'testuser2',
-    password: 'password123',
-    role: 'user',
-    rpsCoins: 20000,
-    stakingRPS: 5000,
-    usdtBalance: 200.0,
-    eRPS: 10000,
-    withdrawableERPS: 1000,
-    lastLogin: new Date(),
-    stakingRecords: { create: [] },
-    transactions: { create: [] },
-    gameHistories: { create: [] }
-  }
-
-  await prisma.user.upsert({
-    where: { username: 'testuser1' },
-    update: {},
-    create: userData1
-  })
-
-  await prisma.user.upsert({
-    where: { username: 'testuser2' },
-    update: {},
-    create: userData2
-  })
-
-  console.log('Seeding completed')
 }
 
 main()

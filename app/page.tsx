@@ -49,8 +49,6 @@ interface StakedAmount {
   duration: number
   apr: number
   penalty: number
-  isActive?: boolean
-  endDate?: string
 }
 
 // Add this to GameState interface
@@ -595,19 +593,17 @@ export default function Game() {
 
   // Add helper function for daily rewards calculation
   const calculateDailyRewards = () => {
-    if (state.stakingRPS === 0) return '0.00';
+    if (state.stakedAmounts.length === 0) return 0;
     
-    // Calculate daily rewards based on APR
-    let totalDailyRewards = 0;
+    const dailyRewards = state.stakedAmounts.reduce((sum, stake) => {
+      // Calculate yearly rewards: amount * (apr/100)
+      const yearlyRewards = stake.amount * (stake.apr / 100);
+      // Convert to daily rewards
+      const dailyReward = yearlyRewards / 365;
+      return sum + dailyReward;
+    }, 0);
     
-    state.stakedAmounts.forEach(stake => {
-      if (stake.isActive) {
-        const dailyRate = stake.apr / 365 / 100;
-        totalDailyRewards += stake.amount * dailyRate;
-      }
-    });
-    
-    return totalDailyRewards.toFixed(2);
+    return dailyRewards;
   };
 
   const calculateUnstakeReturn = () => {
@@ -715,88 +711,44 @@ export default function Game() {
     };
   }, [state.gameMode]);
 
-  // Add these calculation functions
-  const calculateStakingAPR = () => {
-    if (state.stakingRPS === 0) return 0;
-    
-    // Calculate total staked amount and weighted APR
-    let totalStaked = 0;
-    let weightedAPR = 0;
-    
-    state.stakedAmounts.forEach(stake => {
-      if (stake.isActive) {
-        totalStaked += stake.amount;
-        weightedAPR += stake.amount * stake.apr;
-      }
-    });
-    
-    return totalStaked > 0 ? Math.round(weightedAPR / totalStaked) : 0;
-  };
-
-  const calculateStakingDuration = () => {
-    if (state.stakingRPS === 0) return 0;
-    
-    // Find the longest remaining duration
-    let maxDuration = 0;
-    const now = new Date().getTime();
-    
-    state.stakedAmounts.forEach(stake => {
-      if (stake.isActive && stake.endDate) {  // Add null check for endDate
-        const endTime = new Date(stake.endDate).getTime();
-        const remainingDays = Math.ceil((endTime - now) / (1000 * 60 * 60 * 24));
-        maxDuration = Math.max(maxDuration, remainingDays);
-      }
-    });
-    
-    return maxDuration;
-  };
-
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
-      <nav className="flex flex-col sm:flex-row justify-between items-center gap-2 p-2 bg-slate-900/50 backdrop-blur-sm rounded-lg border border-slate-700/30">
-        {/* Logo and Title */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
+      <nav className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-6">
           <Image 
             src="/rpslogo.png" 
             alt="RPS League" 
-            width={40}
-            height={40}
+            width={60}
+            height={60}
             className="animate-flip"
           />
-          <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+          <span className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
             RPS League
           </span>
         </div>
-
-        {/* Buttons */}
-        <div className="flex flex-row items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
+        <div className="flex items-center gap-6">
           <Button 
             onClick={() => window.open('/whitepaper.pdf', '_blank')}
-            className="h-9 px-3 text-sm bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
+            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-6 py-2 text-lg"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:mr-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <path d="M14 2v6h6"/>
               <path d="M16 13H8"/>
               <path d="M16 17H8"/>
               <path d="M10 9H8"/>
             </svg>
-            <span className="hidden sm:inline">Whitepaper</span>
+            Whitepaper
           </Button>
           <Button 
             onClick={() => {
               localStorage.removeItem('user')
               window.location.href = '/login'
             }}
-            className="h-9 px-3 text-sm bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
+            className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-6 py-2 text-lg"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="sm:mr-2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
-            <span className="hidden sm:inline">Disconnect</span>
+            Disconnect
           </Button>
         </div>
       </nav>
@@ -811,77 +763,325 @@ export default function Game() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* RPS Balance */}
-            <div className="space-y-2">
-              <Label>RPS Balance</Label>
-              <div className="text-2xl font-bold text-yellow-400">
-                {state.rpsCoins.toLocaleString()} RPS
+            {/* Balance Rows */}
+            <div className="space-y-4">
+              {/* RPS Balance Row */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>RPS Balance</Label>
+                  <div className="text-2xl font-bold text-blue-400">
+                    {state.rpsCoins.toLocaleString()} RPS
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    ≈ ${(state.rpsCoins * 0.000219).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
+                  </div>
+                </div>
+                {state.swapDialogOpen.rpsToUsdt ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={state.swapAmount}
+                        onChange={(e) => setState(prev => ({ ...prev, swapAmount: e.target.value }))}
+                        placeholder="Amount of RPS"
+                        className="w-32 bg-blue-900/20 border-blue-500/20 text-white"
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="bg-blue-900/20 border-blue-500/20 hover:bg-blue-900/40 text-blue-400"
+                        onClick={() => {
+                          const amount = Number(state.swapAmount)
+                          if (amount <= 0 || amount > state.rpsCoins) {
+                            toast({
+                              title: "Invalid Amount",
+                              description: "Please enter a valid amount within your balance.",
+                              variant: "destructive"
+                            })
+                            return
+                          }
+
+                          const usdtAmount = amount * 0.000219  // Updated rate
+
+                          setState(prev => ({
+                            ...prev,
+                            rpsCoins: prev.rpsCoins - amount,
+                            usdtBalance: prev.usdtBalance + usdtAmount,
+                            swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false },
+                            swapAmount: ''
+                          }))
+
+                          toast({
+                            title: "Swap Successful",
+                            description: `Swapped ${amount.toLocaleString()} RPS to ${usdtAmount.toFixed(2)} USDT`,
+                          })
+                        }}
+                      >
+                        Confirm
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400"
+                        onClick={() => setState(prev => ({
+                          ...prev,
+                          swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false },
+                          swapAmount: ''
+                        }))}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                    <div className="text-xs text-gray-400 text-right space-y-1">
+                      <div>Rate: 1 RPS = $0.000219 USDT</div>
+                      {state.swapAmount && Number(state.swapAmount) > 0 && (
+                        <div className="text-blue-400">
+                          You will receive: {(Number(state.swapAmount) * 0.000219).toFixed(2)} USDT
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="bg-blue-900/20 border-blue-500/20 hover:bg-blue-900/40 text-blue-400"
+                    onClick={() => setState(prev => ({
+                      ...prev,
+                      swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: true }
+                    }))}
+                  >
+                    Swap to USDT
+                  </Button>
+                )}
               </div>
-              <div className="text-sm text-gray-400">
-                ≈ ${(state.rpsCoins * 0.000219).toFixed(2)}
+
+              {/* Staked RPS Row */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Staked RPS</Label>
+                  <div className="text-2xl font-bold text-purple-400">
+                    {state.stakingRPS.toLocaleString()} RPS
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <span>APR: ~{calculateCurrentAPR()}%</span>
+                      <div className="group relative inline-block cursor-help">
+                        <div className="w-4 h-4 rounded-full bg-purple-900/40 border border-purple-400/30 flex items-center justify-center text-xs text-purple-300 hover:bg-purple-900/60">
+                          ?
+                        </div>
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 p-2 bg-purple-900/90 text-purple-100 text-xs rounded-lg shadow-lg backdrop-blur-sm border border-purple-500/20 z-50">
+                          <p>APR is not fixed and may vary based on market conditions and staking duration.</p>
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-purple-900/90 border-r border-b border-purple-500/20"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      {getRemainingStakingDays()} days remaining
+                    </div>
+                  </div>
+                  <div className="text-sm text-green-400 mt-1">
+                    Estimated daily eRPS rewards: {calculateDailyRewards().toFixed(2)}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
+                    onClick={() => setState(prev => ({ ...prev, stakingDialogOpen: true }))}
+                  >
+                    Staking
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="bg-red-900/20 border-red-500/20 hover:bg-red-900/40 text-red-400"
+                    onClick={() => {
+                      if (state.stakedAmounts.length === 0) {
+                        toast({
+                          title: "No Staked Amount",
+                          description: "You don't have any staked RPS to unstake.",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+                      setState(prev => ({ ...prev, unstakeDialogOpen: true }));
+                    }}
+                  >
+                    Unstake
+                  </Button>
+                </div>
               </div>
+
+              {/* USDT Balance Row */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>USDT Balance</Label>
+                  <div className="text-2xl font-bold text-green-400">
+                    ${state.usdtBalance.toLocaleString()}
+                  </div>
+                </div>
+                {state.swapDialogOpen.usdtToRps ? (
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={state.swapAmount}
+                        onChange={(e) => setState(prev => ({ ...prev, swapAmount: e.target.value }))}
+                        placeholder="Amount of USDT"
+                        className="w-32 bg-green-900/20 border-green-500/20 text-white"
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
+                        onClick={() => {
+                          const amount = Number(state.swapAmount)
+                          if (amount <= 0 || amount > state.usdtBalance) {
+                            toast({
+                              title: "Invalid Amount",
+                              description: "Please enter a valid amount within your balance.",
+                              variant: "destructive"
+                            })
+                            return
+                          }
+
+                          const rpsAmount = amount / 0.000219  // Updated rate
+
+                          setState(prev => ({
+                            ...prev,
+                            usdtBalance: prev.usdtBalance - amount,
+                            rpsCoins: prev.rpsCoins + rpsAmount,
+                            swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: false },
+                            swapAmount: ''
+                          }))
+
+                          toast({
+                            title: "Swap Successful",
+                            description: `Swapped ${amount} USDT to ${rpsAmount.toLocaleString()} RPS`,
+                          })
+                        }}
+                      >
+                        Confirm
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400"
+                        onClick={() => setState(prev => ({
+                          ...prev,
+                          swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: false },
+                          swapAmount: ''
+                        }))}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                    <div className="text-xs text-gray-400 text-right space-y-1">
+                      <div>Rate: 1 USDT = {(1 / 0.000219).toLocaleString()} RPS</div>
+                      {state.swapAmount && Number(state.swapAmount) > 0 && (
+                        <div className="text-green-400">
+                          You will receive: {(Number(state.swapAmount) / 0.000219).toLocaleString()} RPS
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
+                    onClick={() => setState(prev => ({
+                      ...prev,
+                      swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: true }
+                    }))}
+                  >
+                    Swap to RPS
+                  </Button>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-3 gap-4 pt-4">
               <Button 
-                variant="outline" 
-                className="w-full bg-yellow-900/20 border-yellow-500/20 hover:bg-yellow-900/40 text-yellow-400"
-                onClick={() => setState(prev => ({
-                  ...prev,
-                  swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: true }
-                }))}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
               >
-                Swap to USDT
+                Deposit USDT
+              </Button>
+              <Button 
+                className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white"
+              >
+                Withdraw USDT
+              </Button>
+              <Button 
+                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+              >
+                Staking
               </Button>
             </div>
 
-            {/* Staked RPS */}
-            <div className="space-y-2">
-              <Label>Staked RPS</Label>
-              <div className="text-2xl font-bold text-purple-400">
-                {state.stakingRPS.toLocaleString()} RPS
+            {/* Currency Exchange Section */}
+            <div className="pt-4">
+              <Label className="text-lg font-semibold text-yellow-400 mb-4">Currency Exchange</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                {Object.entries(state.currencyRates).map(([currency, data]) => (
+                  <div 
+                    key={currency}
+                    className="p-4 bg-gradient-to-br from-slate-800/50 to-slate-700/50 rounded-xl border border-slate-600/20 cursor-pointer hover:bg-slate-700/50 transition-all"
+                    onClick={() => {
+                      window.open(getCoinbaseUrl(currency), '_blank');
+                    }}
+                  >
+                    <div className="text-sm text-gray-400">USDT to {currency}</div>
+                    <div className="h-20 mt-2">
+                      <Line
+                        data={{
+                          labels: data.history.map(h => new Date(h.time).toLocaleTimeString()),
+                          datasets: [{
+                            data: data.history.map(h => h.rate),
+                            borderColor: currency === 'CNY' ? '#facc15' :
+                                      currency === 'CAD' ? '#ef4444' :
+                                      currency === 'AUD' ? '#22c55e' :
+                                      '#3b82f6',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            fill: false
+                          }]
+                        }}
+                        options={{
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: true }
+                          },
+                          scales: {
+                            x: { display: false },
+                            y: {
+                              display: false,
+                              min: Math.min(...data.history.map(h => h.rate)) * 0.999,
+                              max: Math.max(...data.history.map(h => h.rate)) * 1.001
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className={`text-xl font-bold ${
+                      currency === 'CNY' ? 'text-yellow-400' :
+                      currency === 'CAD' ? 'text-red-400' :
+                      currency === 'AUD' ? 'text-green-400' :
+                      'text-blue-400'
+                    }`}>
+                      {currency === 'CNY' ? '¥' :
+                       currency === 'CAD' ? 'C$' :
+                       currency === 'AUD' ? 'A$' :
+                       'RM'} {data.rate.toFixed(2)}
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="text-sm text-gray-400">
-                APR: ~{calculateStakingAPR()}%
-              </div>
-              <div className="text-sm text-gray-400">
-                {calculateStakingDuration()} days remaining
-              </div>
-              <div className="text-sm text-gray-400">
-                Estimated daily eRPS rewards: {calculateDailyRewards()}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button 
-                  variant="outline"
-                  className="bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
-                  onClick={() => setState(prev => ({ ...prev, stakingDialogOpen: true }))}
-                >
-                  Staking
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
-                  onClick={() => setState(prev => ({ ...prev, unstakeDialogOpen: true }))}
-                  disabled={state.stakingRPS === 0}
-                >
-                  Unstake
-                </Button>
-              </div>
-            </div>
-
-            {/* USDT Balance */}
-            <div className="space-y-2">
-              <Label>USDT Balance</Label>
-              <div className="text-2xl font-bold text-green-400">
-                ${state.usdtBalance.toLocaleString()}
-              </div>
-              <Button 
-                variant="outline"
-                className="w-full bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
-                onClick={() => setState(prev => ({
-                  ...prev,
-                  swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: true }
-                }))}
-              >
-                Swap to RPS
-              </Button>
             </div>
           </CardContent>
         </Card>
