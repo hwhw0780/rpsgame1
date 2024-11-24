@@ -16,9 +16,11 @@ async function main() {
         username: 'admin',
         password: adminPassword,
         role: 'admin',
-        balancePoints: 0,
-        playablePoints: 0,
-        withdrawablePoints: 0
+        rpsCoins: 0,
+        stakingRPS: 0,
+        usdtBalance: 0,
+        eRPS: 0,
+        withdrawableERPS: 0
       },
     })
     console.log('Created admin user:', admin.username)
@@ -32,9 +34,11 @@ async function main() {
         username: 'user1',
         password: userPassword,
         role: 'user',
-        balancePoints: 40000,
-        playablePoints: 10000,
-        withdrawablePoints: 0
+        rpsCoins: 40000,
+        stakingRPS: 10000,
+        usdtBalance: 0,
+        eRPS: 0,
+        withdrawableERPS: 0
       },
     })
     console.log('Created test user:', user.username)
