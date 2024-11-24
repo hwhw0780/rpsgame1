@@ -19,11 +19,12 @@ export async function getUserStats(userId: string) {
 
 export async function getLeaderboard() {
   return await prisma.user.findMany({
-    orderBy: { balancePoints: 'desc' },
+    orderBy: { createdAt: 'desc' },
     take: 10,
     select: {
       username: true,
-      balancePoints: true
+      role: true,
+      createdAt: true
     }
   })
 } 

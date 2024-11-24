@@ -8,19 +8,14 @@ datasource db {
 }
 
 model User {
-  id                String   @id @default(cuid())
-  username          String   @unique
-  password          String
-  role              String   @default("user")
-  rpsCoins          Int      @default(40000)
-  stakingRPS        Int      @default(10000)
-  usdtBalance       Int      @default(0)
-  referralCode      String?
-  createdAt         DateTime @default(now())
-  lastLogin         DateTime @default(now())
-  stakingRecords    StakingRecord[]
-  transactions      Transaction[]
-  gameHistory       GameHistory[]
+  id             String          @id @default(cuid())
+  username       String          @unique
+  password       String
+  role           String          @default("user")
+  createdAt      DateTime        @default(now())
+  stakingRecords StakingRecord[]
+  transactions   Transaction[]
+  gameHistories  GameHistory[]
 }
 
 model StakingRecord {
@@ -28,30 +23,35 @@ model StakingRecord {
   userId      String
   user        User     @relation(fields: [userId], references: [id])
   amount      Int
-  duration    Int      // in days
+  duration    Int
+  apr         Float
   startDate   DateTime @default(now())
   endDate     DateTime
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Transaction {
   id          String   @id @default(cuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id])
-  type        String   // deposit, withdraw, stake, unstake
+  type        String
   amount      Int
-  status      String   // pending, completed, failed
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model GameHistory {
   id          String   @id @default(cuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id])
-  gameType    String   // pvp, pvb
+  gameType    String
   betAmount   Int
-  result      String   // win, lose, draw
+  result      String
   createdAt   DateTime @default(now())
-} 
+
+  @@index([userId])
+}
