@@ -714,23 +714,23 @@ export default function Game() {
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
-      <nav className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-6">
+      <nav className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4 p-2">
+        <div className="flex items-center gap-4">
           <Image 
             src="/rpslogo.png" 
             alt="RPS League" 
-            width={60}
-            height={60}
+            width={48}
+            height={48}
             className="animate-flip"
           />
-          <span className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+          <span className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
             RPS League
           </span>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 w-full sm:w-auto">
           <Button 
             onClick={() => window.open('/whitepaper.pdf', '_blank')}
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-6 py-2 text-lg"
+            className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-4 sm:px-6 py-2 text-sm sm:text-lg"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-2">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -746,7 +746,7 @@ export default function Game() {
               localStorage.removeItem('user')
               window.location.href = '/login'
             }}
-            className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-6 py-2 text-lg"
+            className="w-full sm:w-auto bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-4 sm:px-6 py-2 text-sm sm:text-lg"
           >
             Disconnect
           </Button>
@@ -754,15 +754,15 @@ export default function Game() {
       </nav>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8 mb-4 md:mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-2 sm:p-4">
         {/* Finance Center */}
         <Card className="bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)] hover:shadow-[0_0_30px_rgba(234,179,8,0.2)] transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-amber-200 text-transparent bg-clip-text">
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-yellow-400 to-amber-200 text-transparent bg-clip-text">
               Finance Center
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 p-3 sm:p-6">
             {/* Balance Rows */}
             <div className="space-y-4">
               {/* RPS Balance Row */}
@@ -1334,7 +1334,7 @@ export default function Game() {
                 <div className="grid grid-cols-2 gap-4">
                   <Button 
                     onClick={handlePVB}
-                    className="h-32 text-xl bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border border-blue-400/20"
+                    className="h-16 sm:h-24 w-full text-sm sm:text-base"
                   >
                     <div className="flex flex-col items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-200">
@@ -1348,7 +1348,7 @@ export default function Game() {
                   
                   <Button 
                     onClick={() => setState(prev => ({ ...prev, gameMode: 'pvp' }))}
-                    className="h-32 text-xl bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border border-purple-400/20"
+                    className="h-16 sm:h-24 w-full text-sm sm:text-base"
                   >
                     <div className="flex flex-col items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-200">
@@ -2051,7 +2051,7 @@ export default function Game() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               {/* Step 1: Deposit USDT */}
               <div className="bg-slate-800/50 rounded-xl p-4 border border-blue-500/20 hover:border-blue-500/40 transition-all">
                 <div className="h-32 w-full relative mb-3">
@@ -2137,7 +2137,7 @@ export default function Game() {
         </CardHeader>
         <CardContent>
           {/* Original Market Data Content */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div>
               <Label>RPS Price</Label>
               <div className="text-2xl font-bold text-green-400">€0.000219</div>
@@ -2165,7 +2165,7 @@ export default function Game() {
       </Card>
 
       {/* Additional Features Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mt-4 md:mt-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {/* RPS Metaverse Box */}
         <Card className="bg-gradient-to-br from-slate-900/90 via-cyan-900/90 to-slate-900/90 backdrop-blur-sm border border-cyan-500/20 shadow-[0_0_15px_rgba(6,182,212,0.1)] hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] transition-all duration-300">
           <CardHeader>
