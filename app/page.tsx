@@ -595,17 +595,19 @@ export default function Game() {
 
   // Add helper function for daily rewards calculation
   const calculateDailyRewards = () => {
-    if (state.stakedAmounts.length === 0) return 0;
+    if (state.stakingRPS === 0) return '0.00';
     
-    const dailyRewards = state.stakedAmounts.reduce((sum, stake) => {
-      // Calculate yearly rewards: amount * (apr/100)
-      const yearlyRewards = stake.amount * (stake.apr / 100);
-      // Convert to daily rewards
-      const dailyReward = yearlyRewards / 365;
-      return sum + dailyReward;
-    }, 0);
+    // Calculate daily rewards based on APR
+    let totalDailyRewards = 0;
     
-    return dailyRewards;
+    state.stakedAmounts.forEach(stake => {
+      if (stake.isActive) {
+        const dailyRate = stake.apr / 365 / 100;
+        totalDailyRewards += stake.amount * dailyRate;
+      }
+    });
+    
+    return totalDailyRewards.toFixed(2);
   };
 
   const calculateUnstakeReturn = () => {
@@ -739,7 +741,7 @@ export default function Game() {
     const now = new Date().getTime();
     
     state.stakedAmounts.forEach(stake => {
-      if (stake.isActive) {
+      if (stake.isActive && stake.endDate) {  // Add null check for endDate
         const endTime = new Date(stake.endDate).getTime();
         const remainingDays = Math.ceil((endTime - now) / (1000 * 60 * 60 * 24));
         maxDuration = Math.max(maxDuration, remainingDays);
@@ -747,22 +749,6 @@ export default function Game() {
     });
     
     return maxDuration;
-  };
-
-  const calculateDailyRewards = () => {
-    if (state.stakingRPS === 0) return '0.00';
-    
-    // Calculate daily rewards based on APR
-    let totalDailyRewards = 0;
-    
-    state.stakedAmounts.forEach(stake => {
-      if (stake.isActive) {
-        const dailyRate = stake.apr / 365 / 100;
-        totalDailyRewards += stake.amount * dailyRate;
-      }
-    });
-    
-    return totalDailyRewards.toFixed(2);
   };
 
   return (
