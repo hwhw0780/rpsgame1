@@ -1,9 +1,11 @@
-import { PrismaClient, Prisma } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-  const userData: Prisma.UserCreateInput[] = [
-    {
+  await prisma.user.upsert({
+    where: { username: 'testuser1' },
+    update: {},
+    create: {
       username: 'testuser1',
       password: 'password123',
       role: 'user',
@@ -12,12 +14,14 @@ async function main() {
       usdtBalance: 100.0,
       eRPS: 5000,
       withdrawableERPS: 0,
-      lastLogin: new Date(),
-      stakingRecords: { create: [] },
-      transactions: { create: [] },
-      gameHistories: { create: [] }
-    },
-    {
+      lastLogin: new Date()
+    }
+  })
+
+  await prisma.user.upsert({
+    where: { username: 'testuser2' },
+    update: {},
+    create: {
       username: 'testuser2',
       password: 'password123',
       role: 'user',
@@ -26,20 +30,9 @@ async function main() {
       usdtBalance: 200.0,
       eRPS: 10000,
       withdrawableERPS: 1000,
-      lastLogin: new Date(),
-      stakingRecords: { create: [] },
-      transactions: { create: [] },
-      gameHistories: { create: [] }
+      lastLogin: new Date()
     }
-  ]
-
-  for (const data of userData) {
-    await prisma.user.upsert({
-      where: { username: data.username },
-      update: {},
-      create: data
-    })
-  }
+  })
 
   console.log('Seeding completed')
 }

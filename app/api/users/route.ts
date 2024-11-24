@@ -1,18 +1,32 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcrypt'
 
-export async function GET() {
+export async function POST(req: Request) {
   try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        role: true,
-        createdAt: true
+    const data = await req.json()
+    const hashedPassword = await bcrypt.hash(data.password, 10)
+
+    const user = await prisma.user.create({
+      data: {
+        username: data.username,
+        password: hashedPassword,
+        role: 'user',
+        rpsCoins: 40000,
+        stakingRPS: 10000,
+        usdtBalance: 0,
+        eRPS: 0,
+        withdrawableERPS: 0,
+        lastLogin: new Date()
       }
     })
-    return NextResponse.json(users)
+
+    return NextResponse.json({ user })
   } catch (error) {
-    return NextResponse.json({ error: 'Error fetching users' }, { status: 500 })
+    console.error('Registration error:', error)
+    return NextResponse.json(
+      { error: 'Error creating user' },
+      { status: 500 }
+    )
   }
 } 
