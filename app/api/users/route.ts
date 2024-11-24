@@ -15,12 +15,12 @@ export async function POST(req: Request) {
       rpsCoins: 40000,
       stakingRPS: 10000,
       usdtBalance: 0,
-      erps: 0,
-      withdrawableErps: 0,
+      eRPS: 0,
+      withdrawableERPS: 0,
       lastLogin: new Date(),
       stakingRecords: { create: [] },
       transactions: { create: [] },
-      gameHistory: { create: [] }
+      gameHistories: { create: [] }
     }
 
     const user = await prisma.user.create({
