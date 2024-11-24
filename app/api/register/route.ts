@@ -8,7 +8,6 @@ export async function POST(req: Request) {
     const data = await req.json()
     const hashedPassword = await bcrypt.hash(data.password, 10)
 
-    // Define the user data with explicit type
     const createData: Prisma.UserCreateInput = {
       username: data.username,
       password: hashedPassword,
