@@ -4,10 +4,7 @@ export async function getUserStats(userId: string) {
   return await prisma.user.findUnique({
     where: { id: userId },
     include: {
-      stakingRecords: {
-        orderBy: { createdAt: 'desc' },
-        take: 10
-      },
+      stakingRecords: true,
       transactions: {
         orderBy: { createdAt: 'desc' },
         take: 10
