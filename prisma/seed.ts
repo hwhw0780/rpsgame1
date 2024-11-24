@@ -20,7 +20,8 @@ async function main() {
         stakingRPS: 0,
         usdtBalance: 0,
         eRPS: 0,
-        withdrawableERPS: 0
+        withdrawableERPS: 0,
+        lastLogin: new Date()
       },
     })
     console.log('Created admin user:', admin.username)
@@ -38,7 +39,8 @@ async function main() {
         stakingRPS: 10000,
         usdtBalance: 0,
         eRPS: 0,
-        withdrawableERPS: 0
+        withdrawableERPS: 0,
+        lastLogin: new Date()
       },
     })
     console.log('Created test user:', user.username)
