@@ -49,6 +49,8 @@ interface StakedAmount {
   duration: number
   apr: number
   penalty: number
+  isActive?: boolean
+  endDate?: string
 }
 
 // Add this to GameState interface
@@ -710,6 +712,58 @@ export default function Game() {
       clearInterval(countdownTimer);
     };
   }, [state.gameMode]);
+
+  // Add these calculation functions
+  const calculateStakingAPR = () => {
+    if (state.stakingRPS === 0) return 0;
+    
+    // Calculate total staked amount and weighted APR
+    let totalStaked = 0;
+    let weightedAPR = 0;
+    
+    state.stakedAmounts.forEach(stake => {
+      if (stake.isActive) {
+        totalStaked += stake.amount;
+        weightedAPR += stake.amount * stake.apr;
+      }
+    });
+    
+    return totalStaked > 0 ? Math.round(weightedAPR / totalStaked) : 0;
+  };
+
+  const calculateStakingDuration = () => {
+    if (state.stakingRPS === 0) return 0;
+    
+    // Find the longest remaining duration
+    let maxDuration = 0;
+    const now = new Date().getTime();
+    
+    state.stakedAmounts.forEach(stake => {
+      if (stake.isActive) {
+        const endTime = new Date(stake.endDate).getTime();
+        const remainingDays = Math.ceil((endTime - now) / (1000 * 60 * 60 * 24));
+        maxDuration = Math.max(maxDuration, remainingDays);
+      }
+    });
+    
+    return maxDuration;
+  };
+
+  const calculateDailyRewards = () => {
+    if (state.stakingRPS === 0) return '0.00';
+    
+    // Calculate daily rewards based on APR
+    let totalDailyRewards = 0;
+    
+    state.stakedAmounts.forEach(stake => {
+      if (stake.isActive) {
+        const dailyRate = stake.apr / 365 / 100;
+        totalDailyRewards += stake.amount * dailyRate;
+      }
+    });
+    
+    return totalDailyRewards.toFixed(2);
+  };
 
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
