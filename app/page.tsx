@@ -771,151 +771,77 @@ export default function Game() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Balance Containers */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {/* eRPS Balance Container */}
-              <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-500/20">
-                <div className="text-center">
-                  <Label className="text-sm text-purple-200">eRPS Balance</Label>
-                  <div className="text-lg font-bold text-purple-400 mt-1">
-                    {state.eRPS.toLocaleString()}
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="mt-2 w-full text-xs bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
-                  >
-                    Convert to RPS
-                  </Button>
-                </div>
+            {/* RPS Balance */}
+            <div className="space-y-2">
+              <Label>RPS Balance</Label>
+              <div className="text-2xl font-bold text-yellow-400">
+                {state.rpsCoins.toLocaleString()} RPS
               </div>
-
-              {/* Withdrawable eRPS Container */}
-              <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-xl p-3 backdrop-blur-sm border border-green-500/20">
-                <div className="text-center">
-                  <Label className="text-sm text-green-200">Withdrawable eRPS</Label>
-                  <div className="text-lg font-bold text-green-400 mt-1">
-                    {state.withdrawableERPS.toLocaleString()}
-                  </div>
-                  <Button 
-                    variant="outline"
-                    size="sm"
-                    className="mt-2 w-full text-xs bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
-                  >
-                    Withdraw
-                  </Button>
-                </div>
+              <div className="text-sm text-gray-400">
+                ≈ ${(state.rpsCoins * 0.000219).toFixed(2)}
               </div>
-
-              {/* Quick Cash Out Container - Full Width on Mobile */}
-              <div className="col-span-2 sm:col-span-1 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-300/20">
-                <div className="text-center">
-                  <Label className="text-sm text-purple-200">Quick Cash Out</Label>
-                  <div className="text-xs text-gray-400 mt-1">
-                    Convert eRPS (60%)
-                  </div>
-                  <div className="mt-2">
-                    <div className="relative max-w-[200px] mx-auto">
-                      <Input
-                        type="number"
-                        placeholder={`Max: ${state.eRPS}`}
-                        className="h-7 px-2 text-xs bg-purple-900/20 border-purple-500/30 text-white pr-12"
-                        max={state.eRPS}
-                        id="swapAmount"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-7 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200"
-                      >
-                        Max
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="grid grid-cols-3 gap-4 pt-4">
               <Button 
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                variant="outline" 
+                className="w-full bg-yellow-900/20 border-yellow-500/20 hover:bg-yellow-900/40 text-yellow-400"
+                onClick={() => setState(prev => ({
+                  ...prev,
+                  swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: true }
+                }))}
               >
-                Deposit USDT
-              </Button>
-              <Button 
-                className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white"
-              >
-                Withdraw USDT
-              </Button>
-              <Button 
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
-              >
-                Staking
+                Swap to USDT
               </Button>
             </div>
 
-            {/* Currency Exchange Section */}
-            <div className="pt-4">
-              <Label className="text-lg font-semibold text-yellow-400 mb-4">Currency Exchange</Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                {Object.entries(state.currencyRates).map(([currency, data]) => (
-                  <div 
-                    key={currency}
-                    className="p-4 bg-gradient-to-br from-slate-800/50 to-slate-700/50 rounded-xl border border-slate-600/20 cursor-pointer hover:bg-slate-700/50 transition-all"
-                    onClick={() => {
-                      window.open(getCoinbaseUrl(currency), '_blank');
-                    }}
-                  >
-                    <div className="text-sm text-gray-400">USDT to {currency}</div>
-                    <div className="h-20 mt-2">
-                      <Line
-                        data={{
-                          labels: data.history.map(h => new Date(h.time).toLocaleTimeString()),
-                          datasets: [{
-                            data: data.history.map(h => h.rate),
-                            borderColor: currency === 'CNY' ? '#facc15' :
-                                      currency === 'CAD' ? '#ef4444' :
-                                      currency === 'AUD' ? '#22c55e' :
-                                      '#3b82f6',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            pointRadius: 0,
-                            fill: false
-                          }]
-                        }}
-                        options={{
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          plugins: {
-                            legend: { display: false },
-                            tooltip: { enabled: true }
-                          },
-                          scales: {
-                            x: { display: false },
-                            y: {
-                              display: false,
-                              min: Math.min(...data.history.map(h => h.rate)) * 0.999,
-                              max: Math.max(...data.history.map(h => h.rate)) * 1.001
-                            }
-                          }
-                        }}
-                      />
-                    </div>
-                    <div className={`text-xl font-bold ${
-                      currency === 'CNY' ? 'text-yellow-400' :
-                      currency === 'CAD' ? 'text-red-400' :
-                      currency === 'AUD' ? 'text-green-400' :
-                      'text-blue-400'
-                    }`}>
-                      {currency === 'CNY' ? '¥' :
-                       currency === 'CAD' ? 'C$' :
-                       currency === 'AUD' ? 'A$' :
-                       'RM'} {data.rate.toFixed(2)}
-                    </div>
-                  </div>
-                ))}
+            {/* Staked RPS */}
+            <div className="space-y-2">
+              <Label>Staked RPS</Label>
+              <div className="text-2xl font-bold text-purple-400">
+                {state.stakingRPS.toLocaleString()} RPS
               </div>
+              <div className="text-sm text-gray-400">
+                APR: ~{calculateStakingAPR()}%
+              </div>
+              <div className="text-sm text-gray-400">
+                {calculateStakingDuration()} days remaining
+              </div>
+              <div className="text-sm text-gray-400">
+                Estimated daily eRPS rewards: {calculateDailyRewards()}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline"
+                  className="bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
+                  onClick={() => setState(prev => ({ ...prev, stakingDialogOpen: true }))}
+                >
+                  Staking
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
+                  onClick={() => setState(prev => ({ ...prev, unstakeDialogOpen: true }))}
+                  disabled={state.stakingRPS === 0}
+                >
+                  Unstake
+                </Button>
+              </div>
+            </div>
+
+            {/* USDT Balance */}
+            <div className="space-y-2">
+              <Label>USDT Balance</Label>
+              <div className="text-2xl font-bold text-green-400">
+                ${state.usdtBalance.toLocaleString()}
+              </div>
+              <Button 
+                variant="outline"
+                className="w-full bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
+                onClick={() => setState(prev => ({
+                  ...prev,
+                  swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: true }
+                }))}
+              >
+                Swap to RPS
+              </Button>
             </div>
           </CardContent>
         </Card>
