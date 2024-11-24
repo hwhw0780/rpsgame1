@@ -1334,7 +1334,7 @@ export default function Game() {
                 <div className="grid grid-cols-2 gap-4">
                   <Button 
                     onClick={handlePVB}
-                    className="h-16 sm:h-24 w-full text-sm sm:text-base"
+                    className="h-16 sm:h-24 w-full text-sm sm:text-base bg-gradient-to-br from-blue-600/50 to-cyan-600/50 hover:from-blue-600 hover:to-cyan-600 transition-all hover:animate-pulse border border-blue-500/20"
                   >
                     <div className="flex flex-col items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-200">
@@ -1348,7 +1348,7 @@ export default function Game() {
                   
                   <Button 
                     onClick={() => setState(prev => ({ ...prev, gameMode: 'pvp' }))}
-                    className="h-16 sm:h-24 w-full text-sm sm:text-base"
+                    className="h-16 sm:h-24 w-full text-sm sm:text-base bg-gradient-to-br from-purple-600/50 to-pink-600/50 hover:from-purple-600 hover:to-pink-600 transition-all hover:animate-pulse border border-purple-500/20"
                   >
                     <div className="flex flex-col items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-200">
