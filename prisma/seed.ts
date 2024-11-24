@@ -11,7 +11,10 @@ async function main() {
     usdtBalance: 100.0,
     eRPS: 5000,
     withdrawableERPS: 0,
-    lastLogin: new Date()
+    lastLogin: new Date(),
+    stakingRecords: { create: [] },
+    transactions: { create: [] },
+    gameHistories: { create: [] }
   }
 
   const userData2: Prisma.UserCreateInput = {
@@ -23,7 +26,10 @@ async function main() {
     usdtBalance: 200.0,
     eRPS: 10000,
     withdrawableERPS: 1000,
-    lastLogin: new Date()
+    lastLogin: new Date(),
+    stakingRecords: { create: [] },
+    transactions: { create: [] },
+    gameHistories: { create: [] }
   }
 
   await prisma.user.upsert({
