@@ -141,7 +141,7 @@ export default function AdminPage() {
                           {editingUser === user.username ? (
                             <Input 
                               type="number"
-                              value={user.rpsCoins}
+                              value={user.rpsCoins || 0}
                               onChange={(e) => {
                                 const updatedUsers = users.map(u => 
                                   u.username === user.username 
@@ -151,13 +151,13 @@ export default function AdminPage() {
                                 setUsers(updatedUsers)
                               }}
                             />
-                          ) : user.rpsCoins.toLocaleString()}
+                          ) : (user.rpsCoins || 0).toLocaleString()}
                         </td>
                         <td className="p-2">
                           {editingUser === user.username ? (
                             <Input 
                               type="number"
-                              value={user.usdtBalance}
+                              value={user.usdtBalance || 0}
                               onChange={(e) => {
                                 const updatedUsers = users.map(u => 
                                   u.username === user.username 
@@ -167,12 +167,12 @@ export default function AdminPage() {
                                 setUsers(updatedUsers)
                               }}
                             />
-                          ) : user.usdtBalance.toLocaleString()}
+                          ) : (user.usdtBalance || 0).toLocaleString()}
                         </td>
                         <td className="p-2">
                           {editingUser === user.username ? (
                             <Input 
-                              value={user.referralCode}
+                              value={user.referralCode || ''}
                               onChange={(e) => {
                                 const updatedUsers = users.map(u => 
                                   u.username === user.username 
@@ -182,13 +182,13 @@ export default function AdminPage() {
                                 setUsers(updatedUsers)
                               }}
                             />
-                          ) : user.referralCode}
+                          ) : user.referralCode || '-'}
                         </td>
                         <td className="p-2">
                           {editingUser === user.username ? (
                             <Input 
                               type="number"
-                              value={user.referralBonus}
+                              value={user.referralBonus || 0}
                               onChange={(e) => {
                                 const updatedUsers = users.map(u => 
                                   u.username === user.username 
@@ -198,7 +198,7 @@ export default function AdminPage() {
                                 setUsers(updatedUsers)
                               }}
                             />
-                          ) : user.referralBonus.toLocaleString()}
+                          ) : (user.referralBonus || 0).toLocaleString()}
                         </td>
                         <td className="p-2">
                           {editingUser === user.username ? (
