@@ -6,9 +6,22 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     
-    // Find user by username
+    // Find user by username with all balance fields
     const user = await prisma.user.findUnique({
-      where: { username: data.username }
+      where: { username: data.username },
+      select: {
+        id: true,
+        username: true,
+        password: true,
+        role: true,
+        rpsCoins: true,
+        stakingRPS: true,
+        usdtBalance: true,
+        eRPS: true,
+        withdrawableERPS: true,
+        lastLogin: true,
+        createdAt: true
+      }
     })
 
     if (!user) {
@@ -35,7 +48,12 @@ export async function POST(request: Request) {
 
     // Remove password from response
     const { password: _, ...userData } = user
-    return NextResponse.json({ user: userData })
+
+    // Return full user data
+    return NextResponse.json({ 
+      user: userData,
+      message: 'Login successful'
+    })
   } catch (error) {
     console.error('Login error:', error)
     return NextResponse.json(

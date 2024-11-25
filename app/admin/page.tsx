@@ -6,29 +6,21 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/components/ui/use-toast"
+import { prisma } from '@/lib/prisma'
 
 interface UserData {
   username: string
   password: string
   rpsCoins: number
   usdtBalance: number
-  eRPS: number
-  withdrawableERPS: number
+  referralCode: string
+  referralBonus: number
 }
 
 export default function AdminPage() {
   const [users, setUsers] = useState<UserData[]>([])
   const [loading, setLoading] = useState(true)
   const [editingUser, setEditingUser] = useState<string | null>(null)
-  const [newUser, setNewUser] = useState({
-    username: '',
-    password: '',
-    rpsCoins: 0,
-    usdtBalance: 0,
-    eRPS: 0,
-    withdrawableERPS: 0
-  })
-  const [showCreateForm, setShowCreateForm] = useState(false)
 
   useEffect(() => {
     fetchUsers()
@@ -47,46 +39,6 @@ export default function AdminPage() {
       })
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleCreateUser = async () => {
-    try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newUser)
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to create user')
-      }
-
-      toast({
-        title: "Success",
-        description: "User created successfully. They can now login.",
-      })
-
-      // Reset form and refresh user list
-      setNewUser({
-        username: '',
-        password: '',
-        rpsCoins: 0,
-        usdtBalance: 0,
-        eRPS: 0,
-        withdrawableERPS: 0
-      })
-      setShowCreateForm(false)
-      fetchUsers()
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : 'Failed to create user',
-        variant: "destructive"
-      })
     }
   }
 
@@ -130,90 +82,10 @@ export default function AdminPage() {
   return (
     <div className="container mx-auto p-4 space-y-4">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle className="text-2xl font-bold">Admin Dashboard</CardTitle>
-          <Button 
-            onClick={() => setShowCreateForm(true)}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            Create New User
-          </Button>
         </CardHeader>
         <CardContent>
-          {/* Create User Form */}
-          {showCreateForm && (
-            <div className="mb-6 p-4 bg-slate-800 rounded-lg border border-slate-700">
-              <h3 className="text-lg font-semibold mb-4">Create New User</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Username</Label>
-                  <Input
-                    value={newUser.username}
-                    onChange={(e) => setNewUser(prev => ({ ...prev, username: e.target.value }))}
-                    placeholder="Enter username"
-                  />
-                </div>
-                <div>
-                  <Label>Password</Label>
-                  <Input
-                    type="password"
-                    value={newUser.password}
-                    onChange={(e) => setNewUser(prev => ({ ...prev, password: e.target.value }))}
-                    placeholder="Enter password"
-                  />
-                </div>
-                <div>
-                  <Label>RPS Balance</Label>
-                  <Input
-                    type="number"
-                    value={newUser.rpsCoins}
-                    onChange={(e) => setNewUser(prev => ({ ...prev, rpsCoins: Number(e.target.value) }))}
-                  />
-                </div>
-                <div>
-                  <Label>USDT Balance</Label>
-                  <Input
-                    type="number"
-                    value={newUser.usdtBalance}
-                    onChange={(e) => setNewUser(prev => ({ ...prev, usdtBalance: Number(e.target.value) }))}
-                  />
-                </div>
-                <div>
-                  <Label>eRPS Balance</Label>
-                  <Input
-                    type="number"
-                    value={newUser.eRPS}
-                    onChange={(e) => setNewUser(prev => ({ ...prev, eRPS: Number(e.target.value) }))}
-                  />
-                </div>
-                <div>
-                  <Label>Withdrawable eRPS</Label>
-                  <Input
-                    type="number"
-                    value={newUser.withdrawableERPS}
-                    onChange={(e) => setNewUser(prev => ({ ...prev, withdrawableERPS: Number(e.target.value) }))}
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end gap-2 mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowCreateForm(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleCreateUser}
-                  className="bg-green-600 hover:bg-green-700"
-                  disabled={!newUser.username || !newUser.password}
-                >
-                  Create User
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Users Table */}
           <div className="space-y-4">
             {loading ? (
               <div>Loading users...</div>
@@ -226,8 +98,8 @@ export default function AdminPage() {
                       <th className="p-2 text-left">Password</th>
                       <th className="p-2 text-left">RPS Balance</th>
                       <th className="p-2 text-left">USDT Balance</th>
-                      <th className="p-2 text-left">eRPS Balance</th>
-                      <th className="p-2 text-left">Withdrawable eRPS</th>
+                      <th className="p-2 text-left">Referral Code</th>
+                      <th className="p-2 text-left">Referral Bonus</th>
                       <th className="p-2 text-left">Actions</th>
                     </tr>
                   </thead>
@@ -300,34 +172,33 @@ export default function AdminPage() {
                         <td className="p-2">
                           {editingUser === user.username ? (
                             <Input 
-                              type="number"
-                              value={user.eRPS}
+                              value={user.referralCode}
                               onChange={(e) => {
                                 const updatedUsers = users.map(u => 
                                   u.username === user.username 
-                                    ? { ...u, eRPS: Number(e.target.value) }
+                                    ? { ...u, referralCode: e.target.value }
                                     : u
                                 )
                                 setUsers(updatedUsers)
                               }}
                             />
-                          ) : user.eRPS.toLocaleString()}
+                          ) : user.referralCode}
                         </td>
                         <td className="p-2">
                           {editingUser === user.username ? (
                             <Input 
                               type="number"
-                              value={user.withdrawableERPS}
+                              value={user.referralBonus}
                               onChange={(e) => {
                                 const updatedUsers = users.map(u => 
                                   u.username === user.username 
-                                    ? { ...u, withdrawableERPS: Number(e.target.value) }
+                                    ? { ...u, referralBonus: Number(e.target.value) }
                                     : u
                                 )
                                 setUsers(updatedUsers)
                               }}
                             />
-                          ) : user.withdrawableERPS.toLocaleString()}
+                          ) : user.referralBonus.toLocaleString()}
                         </td>
                         <td className="p-2">
                           {editingUser === user.username ? (
