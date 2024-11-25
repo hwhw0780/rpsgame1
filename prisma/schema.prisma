@@ -8,20 +8,20 @@ datasource db {
 }
 
 model User {
-  id                String          @id @default(cuid())
-  username          String          @unique
-  password          String
-  role              String          @default("user")
-  rpsCoins          Int             @default(0)
-  stakingRPS        Int             @default(0)
-  usdtBalance       Float           @default(0)
-  eRPS              Int             @default(0)
-  withdrawableERPS  Int             @default(0)
-  lastLogin         DateTime?
-  createdAt         DateTime        @default(now())
-  stakingRecords    StakingRecord[]
-  transactions      Transaction[]
-  gameHistories     GameHistory[]
+  id               String          @id @default(cuid())
+  username         String          @unique
+  password         String
+  role             String          @default("user")
+  rpsCoins         Int             @default(0)
+  stakingRPS       Int             @default(0)
+  usdtBalance      Float           @default(0)
+  eRPS             Int             @default(0)
+  withdrawableERPS Int             @default(0)
+  lastLogin        DateTime?
+  createdAt        DateTime        @default(now())
+  stakingRecords   StakingRecord[]
+  transactions     Transaction[]
+  gameHistories    GameHistory[]
 }
 
 model StakingRecord {
