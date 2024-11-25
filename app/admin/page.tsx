@@ -92,6 +92,8 @@ export default function AdminPage() {
 
   const handleUpdate = async (username: string, updatedData: Partial<UserData>) => {
     try {
+      const { password, ...updateFields } = updatedData
+
       const response = await fetch('/api/admin/users', {
         method: 'PUT',
         headers: {
@@ -99,11 +101,15 @@ export default function AdminPage() {
         },
         body: JSON.stringify({
           username,
-          ...updatedData
+          ...updateFields
         })
       })
 
-      if (!response.ok) throw new Error('Update failed')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Update failed')
+      }
 
       toast({
         title: "Success",
@@ -115,7 +121,7 @@ export default function AdminPage() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update user",
+        description: error instanceof Error ? error.message : "Failed to update user",
         variant: "destructive"
       })
     }
