@@ -1,18 +1,18 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { headers } from 'next/headers'
+
+interface Params {
+  username: string;
+}
 
 export async function GET(
   request: Request,
-  context: { params: { username: string } }
+  { params }: { params: Params }
 ) {
   try {
-    const headersList = headers()
-    const username = context.params.username
-
     const user = await prisma.user.findUnique({
       where: { 
-        username: username 
+        username: params.username 
       },
       select: {
         id: true,
