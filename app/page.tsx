@@ -928,957 +928,102 @@ export default function Game() {
         </Card>
 
         {/* Game Arena */}
-        <Card className="bg-gradient-to-br from-slate-900/90 via-purple-900/90 to-slate-900/90 backdrop-blur-sm border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)] hover:shadow-[0_0_30px_rgba(168,85,247,0.2)] transition-all duration-300">
+        <Card className="bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-purple-500/20 shadow-[0_0_15px_rgba(147,51,234,0.1)] hover:shadow-[0_0_30px_rgba(147,51,234,0.2)] transition-all duration-300">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">
-              RPS Game Arena
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 text-transparent bg-clip-text">
+              RPS Arena
             </CardTitle>
-            <div className="grid grid-cols-3 gap-4 mt-4">
-              <div className="relative text-center p-4 bg-gradient-to-br from-indigo-600/20 to-blue-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-indigo-300/20">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-2 right-2 h-8 w-8 p-0 text-lg font-bold bg-indigo-900/40 hover:bg-indigo-900/60 text-indigo-300 hover:text-indigo-100 rounded-lg border border-indigo-400/30 flex items-center justify-center"
-                  onClick={() => {
-                    const maxDeposit = Math.floor(state.rpsCoins * 0.05);
-                    const depositAmount = window.prompt(
-                      `Enter amount to deposit:\n\nMaximum deposit: ${maxDeposit.toLocaleString()} RPS (5% of your RPS balance)\nYour RPS Balance: ${state.rpsCoins.toLocaleString()} RPS`
-                    );
-                    
-                    if (depositAmount === null) return;
-                    
-                    const amount = Number(depositAmount);
-                    if (isNaN(amount) || amount <= 0) {
-                      toast({
-                        title: "Invalid Amount",
-                        description: "Please enter a valid number greater than 0",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    
-                    if (amount > maxDeposit) {
-                      toast({
-                        title: "Exceeds Limit",
-                        description: `Maximum deposit is ${maxDeposit.toLocaleString()} RPS (5% of your RPS balance)`,
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    
-                    if (amount > state.rpsCoins) {
-                      toast({
-                        title: "Insufficient Balance",
-                        description: "You don't have enough RPS to deposit this amount",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-
-                    setState(prev => ({
-                      ...prev,
-                      rpsCoins: prev.rpsCoins - amount,
-                      eRPS: prev.eRPS + amount
-                    }));
-
-                    toast({
-                      title: "Deposit Successful",
-                      description: `Deposited ${amount.toLocaleString()} RPS to eRPS`,
-                    });
-                  }}
-                >
-                  +
-                </Button>
-
-                <div className="flex flex-col items-center justify-center mt-2">
-                  <div className="flex items-center gap-1">
-                    <Label className="text-indigo-200 font-semibold">eRPS</Label>
-                    <div className="group relative inline-block cursor-help">
-                      <div className="w-4 h-4 rounded-full bg-indigo-900/40 border border-indigo-400/30 flex items-center justify-center text-xs text-indigo-300 hover:bg-indigo-900/60">
-                        ?
-                      </div>
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 p-2 bg-indigo-900/90 text-indigo-100 text-xs rounded-lg shadow-lg backdrop-blur-sm border border-indigo-500/20 z-50">
-                        <p>Stake your RPS tokens to earn eRPS. Higher stakes and longer durations earn more rewards!</p>
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-indigo-900/90 border-r border-b border-indigo-500/20"></div>
-                      </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Balance Containers */}
+            <div className="space-y-3">
+              {/* Top Row: eRPS and Withdrawable eRPS */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* eRPS Balance Container */}
+                <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-500/20">
+                  <div className="text-center">
+                    <Label className="text-sm text-purple-200">eRPS Balance</Label>
+                    <div className="text-lg font-bold text-purple-400 mt-1">
+                      {state.eRPS.toLocaleString()}
                     </div>
                   </div>
-                  <div className="text-xl font-bold text-indigo-300 mt-2">
-                    {state.eRPS.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-400">
-                    ≈ ${(state.eRPS * 0.000219).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
+                </div>
+
+                {/* Withdrawable eRPS Container */}
+                <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-xl p-3 backdrop-blur-sm border border-green-500/20">
+                  <div className="text-center">
+                    <Label className="text-sm text-green-200">Withdrawable eRPS</Label>
+                    <div className="text-lg font-bold text-green-400 mt-1">
+                      {state.withdrawableERPS.toLocaleString()}
+                    </div>
                   </div>
                 </div>
               </div>
-              
-              {/* Withdrawable eRPS Box */}
-              <div className="text-center p-4 bg-gradient-to-br from-emerald-600/20 to-green-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-emerald-300/20">
-                <div className="flex items-center justify-center">
-                  <Label className="text-emerald-200 font-semibold">Withdrawable eRPS</Label>
-                </div>
-                <div className="text-xl font-bold text-emerald-300 mt-1">
-                  {state.withdrawableERPS.toLocaleString()} points
-                </div>
-                {state.withdrawableERPS > 0 && (
-                  <div className="flex flex-col gap-2 mt-2">
-                    <div className="relative">
+
+              {/* Bottom Row: Quick Cash Out */}
+              <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-300/20">
+                <div className="text-center">
+                  <Label className="text-sm text-purple-200">Quick Cash Out</Label>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Convert eRPS (60%)
+                  </div>
+                  <div className="mt-2">
+                    <div className="relative max-w-[200px] mx-auto">
                       <Input
                         type="number"
-                        placeholder={`Max: ${state.withdrawableERPS}`}
-                        className="h-6 px-2 text-xs bg-emerald-900/20 border-emerald-500/30 text-white pr-16"
-                        max={state.withdrawableERPS}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          if (value > state.withdrawableERPS) {
-                            e.target.value = state.withdrawableERPS.toString();
-                          }
-                        }}
-                        id="withdrawAmount"
+                        placeholder={`Max: ${state.eRPS}`}
+                        className="h-7 px-2 text-xs bg-purple-900/20 border-purple-500/30 text-white pr-12"
+                        max={state.eRPS}
+                        id="swapAmount"
                       />
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="absolute right-0 top-0 h-6 px-2 text-xs bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-200 rounded-l-none"
+                        className="absolute right-0 top-0 h-7 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200"
                         onClick={() => {
-                          const input = document.getElementById('withdrawAmount') as HTMLInputElement;
-                          input.value = state.withdrawableERPS.toString();
+                          const input = document.getElementById('swapAmount') as HTMLInputElement;
+                          input.value = state.eRPS.toString();
                         }}
                       >
                         Max
                       </Button>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="h-6 px-2 text-xs bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-200 flex items-center gap-1 rounded-md border border-emerald-500/30"
-                      onClick={() => {
-                        const amount = Number((document.getElementById('withdrawAmount') as HTMLInputElement).value);
-                        if (amount <= 0 || amount > state.withdrawableERPS) {
-                          toast({
-                            title: "Invalid Amount",
-                            description: "Please enter a valid amount to withdraw.",
-                            variant: "destructive"
-                          });
-                          return;
-                        }
-
-                        setState(prev => ({
-                          ...prev,
-                          rpsCoins: prev.rpsCoins + amount,
-                          withdrawableERPS: prev.withdrawableERPS - amount
-                        }));
-
-                        toast({
-                          title: "Withdrawal Successful",
-                          description: `${amount.toLocaleString()} eRPS has been added to your RPS balance.`,
-                        });
-
-                        (document.getElementById('withdrawAmount') as HTMLInputElement).value = '';
-                      }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 5v14"/>
-                        <path d="M19 12l-7 7-7-7"/>
-                      </svg>
-                      <span>Withdraw</span>
-                    </Button>
                   </div>
-                )}
-              </div>
-              
-              {/* Replace the Buy Skin box with eRPS Swap box */}
-              <div className="text-center p-4 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-purple-300/20">
-                <Label className="text-purple-200 font-semibold">Quick Cash Out</Label>
-                <div className="text-sm text-gray-400 mt-1 mb-2">
-                  Convert eRPS to Withdrawable eRPS
-                  <br />
-                  (Receive 60%)
-                </div>
-                <div className="flex flex-col gap-2">
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      placeholder={`Max: ${state.eRPS}`}
-                      className="h-6 px-2 text-xs bg-purple-900/20 border-purple-500/30 text-white pr-16"
-                      max={state.eRPS}
-                      onChange={(e) => {
-                        const value = Number(e.target.value);
-                        if (value > state.eRPS) {
-                          e.target.value = state.eRPS.toString();
-                        }
-                      }}
-                      id="swapAmount"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-6 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200 rounded-l-none"
-                      onClick={() => {
-                        const input = document.getElementById('swapAmount') as HTMLInputElement;
-                        input.value = state.eRPS.toString();
-                      }}
-                    >
-                      Max
-                    </Button>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="h-6 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200 flex items-center gap-1 rounded-md border border-purple-500/30"
-                    onClick={() => {
-                      const amount = Number((document.getElementById('swapAmount') as HTMLInputElement).value);
-                      if (amount <= 0 || amount > state.eRPS) {
-                        toast({
-                          title: "Invalid Amount",
-                          description: "Please enter a valid amount to swap.",
-                          variant: "destructive"
-                        });
-                        return;
-                      }
-
-                      const withdrawableAmount = Math.floor(amount * 0.6); // 60% conversion rate
-
-                      setState(prev => ({
-                        ...prev,
-                        eRPS: prev.eRPS - amount,
-                        withdrawableERPS: prev.withdrawableERPS + withdrawableAmount
-                      }));
-
-                      toast({
-                        title: "Swap Successful",
-                        description: `Swapped ${amount.toLocaleString()} eRPS to ${withdrawableAmount.toLocaleString()} Withdrawable eRPS`,
-                      });
-
-                      (document.getElementById('swapAmount') as HTMLInputElement).value = '';
-                    }}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
-                      <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
-                      <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
-                      <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
-                    </svg>
-                    <span>Swap</span>
-                  </Button>
                 </div>
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            {state.gameMode === 'idle' && (
-              <div className="space-y-8">
-                {/* Game Mode Selection */}
-                <div className="grid grid-cols-2 gap-4">
-                  <Button 
-                    onClick={handlePVB}
-                    className="h-32 text-xl bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border border-blue-400/20"
-                  >
-                    <div className="flex flex-col items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-200">
-                        <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
-                        <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
-                        <path d="M12 12a2 2 0 0 0 0 4 2 2 0 0 0 0-4z" />
-                      </svg>
-                      Play vs Bot
-                    </div>
-                  </Button>
-                  
-                  <Button 
-                    onClick={() => setState(prev => ({ ...prev, gameMode: 'pvp' }))}
-                    className="h-32 text-xl bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border border-purple-400/20"
-                  >
-                    <div className="flex flex-col items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-200">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
-                      Play vs Player
-                    </div>
-                  </Button>
+
+            {/* Game Mode Selection */}
+            <div className="grid grid-cols-2 gap-4">
+              <Button 
+                onClick={handlePVB}
+                className="h-32 text-xl bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border border-blue-400/20"
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-200">
+                    <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
+                    <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                    <path d="M12 12a2 2 0 0 0 0 4 2 2 0 0 0 0-4z" />
+                  </svg>
+                  Play vs Bot
                 </div>
-
-                {/* Quest Rewards Section */}
-                <div className="bg-gradient-to-br from-yellow-900/20 to-amber-900/20 rounded-xl p-6 border border-yellow-500/20">
-                  <h3 className="text-xl font-bold text-yellow-400 mb-4 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
-                    Quest Rewards
-                  </h3>
-                  <div className="space-y-3">
-                    {/* Daily Staking Rewards Quest - First Position */}
-                    <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all">
-                      <div className="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-400">
-                          <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
-                          <path d="M12 2v2"/>
-                          <path d="M12 20v2"/>
-                          <path d="m4.93 4.93 1.41 1.41"/>
-                          <path d="m17.66 17.66 1.41 1.41"/>
-                          <path d="M2 12h2"/>
-                          <path d="M20 12h2"/>
-                          <path d="m6.34 17.66-1.41 1.41"/>
-                          <path d="m19.07 4.93-1.41 1.41"/>
-                        </svg>
-                        <div>
-                          <span>Daily Staking Rewards</span>
-                          <span className="ml-2 text-xs text-green-400">(Daily Quest)</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-yellow-400 font-bold">+{calculateDailyRewards().toFixed(2)} eRPS</div>
-                        {state.questStatus.daily_rewards === 'completed' && !canClaimDaily() && (
-                          <div className="text-gray-400 text-xs font-mono">
-                            {getTimeUntilNextClaim()}
-                          </div>
-                        )}
-                        {(state.questStatus.daily_rewards === 'unclaimed' || 
-                          (state.questStatus.daily_rewards === 'completed' && canClaimDaily())) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-green-900/40 hover:bg-green-900/60 text-green-200"
-                            onClick={() => {
-                              if (calculateDailyRewards() <= 0) {
-                                toast({
-                                  title: "No Rewards Available",
-                                  description: "You need to stake RPS to earn daily rewards.",
-                                  variant: "destructive"
-                                });
-                                return;
-                              }
-
-                              const rewards = calculateDailyRewards();
-                              const now = new Date();
-                              
-                              setState(prev => ({
-                                ...prev,
-                                eRPS: prev.eRPS + rewards,
-                                questStatus: {
-                                  ...prev.questStatus,
-                                  daily_rewards: 'completed',
-                                  lastDailyRewardsClaim: now.toISOString() // Store current time
-                                }
-                              }));
-
-                              toast({
-                                title: "Daily Rewards Claimed!",
-                                description: `${rewards.toFixed(2)} eRPS has been added to your balance.`,
-                              });
-                            }}
-                          >
-                            Claim
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Twitter Share Quest - Daily Quest */}
-                    <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all">
-                      <div className="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
-                          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
-                        </svg>
-                        <div>
-                          <span>Share To Twitter</span>
-                          <span className="ml-2 text-xs text-blue-400">(Daily Quest)</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-yellow-400 font-bold">+50 eRPS</div>
-                        {state.questStatus.twitter_share === 'pending' && (
-                          <div className="flex items-center gap-2 text-blue-400">
-                            <div className="animate-spin">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                              </svg>
-                            </div>
-                            <span className="text-xs italic">Verifying share (50s)...</span>
-                          </div>
-                        )}
-                        {state.questStatus.twitter_share === 'completed' && !canClaimDaily() && (
-                          <div className="text-gray-400 text-xs">Next claim available tomorrow</div>
-                        )}
-                        {(state.questStatus.twitter_share === 'unclaimed' || 
-                          (state.questStatus.twitter_share === 'completed' && canClaimDaily())) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-blue-900/40 hover:bg-blue-900/60 text-blue-200"
-                            onClick={() => {
-                              window.open('YOUR_TWITTER_SHARE_LINK', '_blank')
-                              setState(prev => ({
-                                ...prev,
-                                questStatus: { 
-                                  ...prev.questStatus, 
-                                  twitter_share: 'pending',
-                                }
-                              }))
-                            }}
-                          >
-                            Share
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Telegram Quest - Now Second */}
-                    <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all">
-                      <div className="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
-                          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-                        </svg>
-                        <span>Follow Telegram</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-yellow-400 font-bold">+5000 eRPS</div>
-                        {state.questStatus.telegram === 'pending' && (
-                          <div className="flex items-center gap-2 text-blue-400">
-                            <div className="animate-spin">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                              </svg>
-                            </div>
-                            <span className="text-xs italic">Verifying subscription (50s)...</span>
-                          </div>
-                        )}
-                        {state.questStatus.telegram === 'verified' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-green-900/40 hover:bg-green-900/60 text-green-200"
-                            onClick={() => {
-                              setState(prev => ({
-                                ...prev,
-                                eRPS: prev.eRPS + 5000,
-                                questStatus: {
-                                  ...prev.questStatus,
-                                  telegram: 'completed'
-                                }
-                              }));
-                              toast({
-                                title: "Rewards Claimed!",
-                                description: "5000 eRPS has been added to your balance.",
-                              });
-                            }}
-                          >
-                            Claim Rewards
-                          </Button>
-                        )}
-                        {state.questStatus.telegram === 'completed' && (
-                          <div className="text-green-400 text-sm">Completed ✓</div>
-                        )}
-                        {state.questStatus.telegram === 'unclaimed' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-blue-900/40 hover:bg-blue-900/60 text-blue-200"
-                            onClick={() => {
-                              window.open('YOUR_TELEGRAM_LINK', '_blank');
-                              setState(prev => ({
-                                ...prev,
-                                questStatus: { ...prev.questStatus, telegram: 'pending' }
-                              }));
-                            }}
-                          >
-                            Follow
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Twitter Like Quest remains last */}
-                    <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all">
-                      <div className="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                        <span>Like our Twitter</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-yellow-400 font-bold">+5000 eRPS</div>
-                        {state.questStatus.twitter_like === 'pending' && (
-                          <div className="flex items-center gap-2 text-blue-400">
-                            <div className="animate-spin">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                              </svg>
-                            </div>
-                            <span className="text-xs italic">Verifying like (50s)...</span>
-                          </div>
-                        )}
-                        {state.questStatus.twitter_like === 'completed' && (
-                          <div className="text-green-400 text-sm">Completed ✓</div>
-                        )}
-                        {state.questStatus.twitter_like === 'unclaimed' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-blue-900/40 hover:bg-blue-900/60 text-blue-200"
-                            onClick={() => {
-                              window.open('YOUR_TWITTER_LIKE_LINK', '_blank')
-                              setState(prev => ({
-                                ...prev,
-                                questStatus: { ...prev.questStatus, twitter_like: 'pending' }
-                              }))
-                            }}
-                          >
-                            Like
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+              </Button>
+              
+              <Button 
+                onClick={() => setState(prev => ({ ...prev, gameMode: 'pvp' }))}
+                className="h-32 text-xl bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border border-purple-400/20"
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-200">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Play vs Player
                 </div>
-              </div>
-            )}
-
-            {/* PvP Mode - Segment Selection */}
-            {state.gameMode === 'pvp' && (
-              <div className="space-y-4">
-                <div className="text-sm text-gray-400 mb-4 text-center">
-                  Note: 5% platform fee will be charged on winnings
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 md:gap-4">
-                  {[100, 500, 1000, 2000, 5000, 20000].map(amount => (
-                    <Button
-                      key={amount}
-                      onClick={() => handlePVPSegment(amount)}
-                      disabled={amount > state.eRPS}
-                      className={`h-24 flex flex-col gap-2 transition-all ${
-                        amount <= state.eRPS 
-                          ? 'bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border border-purple-400/20' 
-                          : 'bg-gray-800/50 border-gray-700/20 cursor-not-allowed'
-                      }`}
-                    >
-                      <span className="text-lg font-bold">{amount} eRPS</span>
-                      <span className="text-sm text-gray-400">
-                        {state.onlinePlayers[amount]} players
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        Win: {amount * 0.95} eRPS
-                      </span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* PvP Mode - Queue */}
-            {state.gameMode === 'pvp_queuing' && (
-              <div className="text-center space-y-6">
-                <div className="bg-slate-800/50 p-6 rounded-lg border border-purple-500/20">
-                  <div className="text-2xl font-bold text-purple-400 mb-4">
-                    Finding Opponents
-                  </div>
-                  <div className="relative w-24 h-24 mx-auto mb-6">
-                    <div className="absolute inset-0 bg-purple-500/20 rounded-full animate-pulse-ring" />
-                    <div className="absolute inset-0 bg-purple-500/30 rounded-full animate-pulse-ring" style={{ animationDelay: '0.5s' }} />
-                    <div className="absolute inset-0 bg-purple-500/40 rounded-full animate-pulse-ring" style={{ animationDelay: '1s' }} />
-                    <div className="relative w-full h-full bg-purple-600/50 rounded-full flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-200">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="text-lg text-gray-300">
-                      Segment: {state.pvpSegment} eRPS
-                    </div>
-                    <div className="text-lg text-gray-300">
-                      Estimated time: {state.estimatedQueueTime}s
-                    </div>
-                    <div className="text-lg text-gray-300">
-                      Time remaining: {state.queueTimeLeft}s
-                    </div>
-                  </div>
-                  <div className="mt-6">
-                    <Progress 
-                      value={((state.estimatedQueueTime! - (state.queueTimeLeft || 0)) / state.estimatedQueueTime!) * 100}
-                      className="h-2 bg-slate-700"
-                    />
-                  </div>
-                  {state.opponentFound && (
-                    <div className="mt-6 p-4 bg-green-900/20 rounded-lg border border-green-500/20 animate-pulse">
-                      <div className="text-xl text-green-400 mb-2">
-                        Opponent Found!
-                      </div>
-                      <div className="text-lg text-gray-300">
-                        {state.opponent}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <Button 
-                  onClick={() => setState(prev => ({ 
-                    ...prev, 
-                    gameMode: 'idle',
-                    opponent: null,
-                    queueTimeLeft: null,
-                    estimatedQueueTime: null,
-                    opponentHistory: []
-                  }))}
-                  variant="outline"
-                  className="bg-red-900/20 border-red-500/20 hover:bg-red-900/40 text-red-400"
-                >
-                  Cancel Queue
-                </Button>
-              </div>
-            )}
-
-            {/* PvP/PvB Battle */}
-            {state.gameMode === 'pvp_battle' && (
-              <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <div className="text-gray-400 font-mono">
-                    Game No: {state.currentGameNo}
-                  </div>
-                  <div className="text-xl font-bold text-red-400">
-                    Time to choose: {state.choiceTimeLeft}s
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-8">
-                  <div className="text-center">
-                    <Image 
-                      src="/11.png" 
-                      alt="You"
-                      width={48}
-                      height={48}
-                      className="rounded-full border-2 border-blue-500 mx-auto"
-                    />
-                    <p className="mt-2 text-blue-400">You</p>
-                  </div>
-
-                  <div className="text-2xl font-bold text-purple-400">VS</div>
-
-                  <div className="text-center space-y-4">
-                    <Image 
-                      src="/10.png" 
-                      alt="Opponent"
-                      width={48}
-                      height={48}
-                      className="rounded-full border-2 border-red-500 mx-auto"
-                    />
-                    <p className="text-red-400">{state.opponent}</p>
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-400">Last 5 Games:</p>
-                      <div className="flex gap-1 justify-center">
-                        {state.opponentHistory.map((choice, index) => (
-                          <div 
-                            key={index}
-                            className="w-8 h-8 flex items-center justify-center bg-red-900/30 rounded-md"
-                          >
-                            <Image 
-                              src={choice === 'rock' ? '/7.png' : 
-                                   choice === 'paper' ? '/8.png' : 
-                                   '/9.png'}
-                              alt={choice}
-                              width={24}
-                              height={24}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {!state.playerChoice && (
-                  <div className="grid grid-cols-3 gap-4 mt-6">
-                    {choices.map((choice: Choice) => (
-                      <Button
-                        key={choice}
-                        onClick={() => playGame(choice)}
-                        className="h-24 bg-gradient-to-br from-indigo-600/50 to-purple-600/50 hover:from-indigo-600 hover:to-purple-600 transition-all"
-                      >
-                        <Image 
-                          src={choiceImages[choice]}
-                          alt={choice}
-                          width={64}
-                          height={64}
-                        />
-                      </Button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Result Screen */}
-            {state.gameMode === 'result' && (
-              <div className="text-center space-y-6 py-8">
-                <div className="text-gray-400 font-mono mb-4">
-                  Game No: {state.currentGameNo}
-                </div>
-
-                <div className="flex justify-center items-center space-x-8 mb-6">
-                  <div className="text-center">
-                    <Image 
-                      src="/11.png" 
-                      alt="You"
-                      width={48}
-                      height={48}
-                      className="rounded-full border-2 border-blue-500 mx-auto mb-2"
-                    />
-                    <p className="text-blue-400">You</p>
-                  </div>
-                  <div className="text-2xl font-bold text-purple-400">VS</div>
-                  <div className="text-center">
-                    <Image 
-                      src="/10.png" 
-                      alt={state.opponent || 'Bot'}
-                      width={48}
-                      height={48}
-                      className="rounded-full border-2 border-red-500 mx-auto mb-2"
-                    />
-                    <p className="text-red-400">{state.opponent}</p>
-                  </div>
-                </div>
-
-                <div className={`text-4xl font-bold ${
-                  state.gameResult === 'win' ? 'text-green-400' : 
-                  state.gameResult === 'lose' ? 'text-red-400' : 
-                  'text-yellow-400'
-                }`}>
-                  {state.gameResult === 'win' ? 'Congratulations!' : 
-                   state.gameResult === 'lose' ? 'Oops!' : 
-                   'Draw!'}
-                </div>
-                
-                <div className={`text-6xl font-bold ${
-                  state.gameResult === 'win' ? 'text-green-500' : 
-                  state.gameResult === 'lose' ? 'text-red-500' : 
-                  'text-yellow-500'
-                }`}>
-                  {state.gameResult === 'win' ? 
-                    (state.gameMode.includes('pvp') ? 
-                      `+${Math.floor(state.betAmount * 0.95)}` : // PvP win (95% of bet)
-                      `+${state.betAmount}` // PvB win (100% of bet)
-                    ) : 
-                 state.gameResult === 'lose' ? `-${state.betAmount}` : 
-                 `+0`}
-                </div>
-
-                {state.gameMode.includes('pvp') && state.gameResult === 'win' && (
-                  <div className="text-sm text-gray-400">
-                    (5% platform fee deducted)
-                  </div>
-                )}
-
-                <Button
-                  onClick={() => setState(prev => ({
-                    ...prev,
-                    gameMode: 'idle',
-                    playerChoice: null,
-                    botChoice: null,
-                    gameResult: null,
-                    opponent: null,
-                    opponentHistory: []
-                  }))}
-                  className="mt-8 px-8 py-4 text-xl bg-gradient-to-r from-purple-600 to-indigo-600"
-                >
-                  Back to Game Selection
-                </Button>
-              </div>
-            )}
-
-            {/* Betting Screen */}
-            {state.gameMode === 'betting' && (
-              <div className="space-y-6">
-                <div className="text-center text-2xl font-bold text-purple-400 mb-4">
-                  Place Your Bet
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Bet Amount (eRPS)</Label>
-                    <Input
-                      type="number"
-                      value={state.betAmount}
-                      onChange={(e) => setState(prev => ({
-                        ...prev,
-                        betAmount: Math.max(0, parseInt(e.target.value) || 0)
-                      }))}
-                      min={1}
-                      max={state.eRPS}
-                      className="bg-slate-800/50 border-purple-500/20 text-white"
-                    />
-                    <div className="text-sm text-gray-400">
-                      Available: {state.eRPS.toLocaleString()} eRPS
-                    </div>
-                  </div>
-                  <Button 
-                    onClick={handleBet} 
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
-                    disabled={state.betAmount <= 0 || state.betAmount > state.eRPS}
-                  >
-                    Place Bet
-                  </Button>
-                  <Button 
-                    onClick={() => setState(prev => ({ ...prev, gameMode: 'idle' }))}
-                    variant="outline" 
-                    className="w-full"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {state.gameMode === 'pvb' && (
-              <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <div className="text-gray-400 font-mono">
-                    Game No: {state.currentGameNo}
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-8">
-                  <div className="text-center">
-                    <Image 
-                      src="/11.png" 
-                      alt="You"
-                      width={48}
-                      height={48}
-                      className="rounded-full border-2 border-blue-500 mx-auto"
-                    />
-                    <p className="mt-2 text-blue-400">You</p>
-                  </div>
-
-                  <div className="text-2xl font-bold text-purple-400">VS</div>
-
-                  <div className="text-center space-y-4">
-                    <Image 
-                      src="/10.png" 
-                      alt="Bot"
-                      width={48}
-                      height={48}
-                      className="rounded-full border-2 border-red-500 mx-auto"
-                    />
-                    <p className="text-red-400">Bot</p>
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-400">Last 5 Games:</p>
-                      <div className="flex gap-1 justify-center">
-                        {state.opponentHistory.map((choice, index) => (
-                          <div 
-                            key={index}
-                            className="w-8 h-8 flex items-center justify-center bg-red-900/30 rounded-md"
-                          >
-                            <Image 
-                              src={choice === 'rock' ? '/7.png' : 
-                                   choice === 'paper' ? '/8.png' : 
-                                   '/9.png'}
-                              alt={choice}
-                              width={24}
-                              height={24}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 mt-6">
-                  {choices.map((choice: Choice) => (
-                    <Button
-                      key={choice}
-                      onClick={() => playGame(choice)}
-                      className="h-24 bg-gradient-to-br from-indigo-600/50 to-purple-600/50 hover:from-indigo-600 hover:to-purple-600 transition-all"
-                    >
-                      <Image 
-                        src={choiceImages[choice]}
-                        alt={choice}
-                        width={64}
-                        height={64}
-                      />
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Battling State */}
-            {state.gameMode === 'battling' && (
-              <div className="space-y-6">
-                <div className="text-center space-y-2">
-                  <div className="text-gray-400 font-mono">
-                    Game No: {state.currentGameNo}
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-8">
-                  {/* Player Side */}
-                  <div className="text-center">
-                    <Image 
-                      src="/11.png" 
-                      alt="You"
-                      width={48}
-                      height={48}
-                      className="rounded-full border-2 border-blue-500 mx-auto"
-                    />
-                    <p className="mt-2 text-blue-400">You</p>
-                    <div className="mt-4 w-24 h-24 flex items-center justify-center bg-blue-900/30 rounded-xl border border-blue-500/20">
-                      {state.playerChoice && (
-                        <div className="animate-drop-in">
-                          <Image 
-                            src={choiceImages[state.playerChoice]}
-                            alt={state.playerChoice}
-                            width={64}
-                            height={64}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="text-2xl font-bold text-purple-400 animate-pulse">VS</div>
-
-                  {/* Bot Side */}
-                  <div className="text-center">
-                    <Image 
-                      src="/10.png" 
-                      alt={state.opponent || 'Bot'}
-                      width={48}
-                      height={48}
-                      className="rounded-full border-2 border-red-500 mx-auto"
-                    />
-                    <p className="mt-2 text-red-400">{state.opponent}</p>
-                    <div className="mt-4 w-24 h-24 flex items-center justify-center bg-red-900/30 rounded-xl border border-red-500/20">
-                      {state.botChoice ? (
-                        <div className="animate-drop-in">
-                          <Image 
-                            src={choiceImages[state.botChoice]}
-                            alt={state.botChoice}
-                            width={64}
-                            height={64}
-                          />
-                        </div>
-                      ) : (
-                        <div className="animate-spin">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-400">
-                            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-center mt-8 text-gray-400">
-                  {state.botChoice ? "Battle complete!" : "Waiting for bot's move..."}
-                </div>
-              </div>
-            )}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
