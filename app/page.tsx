@@ -1093,141 +1093,60 @@ export default function Game() {
               RPS Game Arena
             </CardTitle>
             <div className="grid grid-cols-3 gap-4 mt-4">
-              <div className="relative text-center p-4 bg-gradient-to-br from-indigo-600/20 to-blue-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-indigo-300/20">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-2 right-2 h-8 w-8 p-0 text-lg font-bold bg-indigo-900/40 hover:bg-indigo-900/60 text-indigo-300 hover:text-indigo-100 rounded-lg border border-indigo-400/30 flex items-center justify-center"
-                  onClick={() => {
-                    const maxDeposit = Math.floor(state.rpsCoins * 0.05);
-                    const depositAmount = window.prompt(
-                      `Enter amount to deposit:\n\nMaximum deposit: ${maxDeposit.toLocaleString()} RPS (5% of your RPS balance)\nYour RPS Balance: ${state.rpsCoins.toLocaleString()} RPS`
-                    );
-                    
-                    if (depositAmount === null) return;
-                    
-                    const amount = Number(depositAmount);
-                    if (isNaN(amount) || amount <= 0) {
-                      toast({
-                        title: "Invalid Amount",
-                        description: "Please enter a valid number greater than 0",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    
-                    if (amount > maxDeposit) {
-                      toast({
-                        title: "Exceeds Limit",
-                        description: `Maximum deposit is ${maxDeposit.toLocaleString()} RPS (5% of your RPS balance)`,
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-                    
-                    if (amount > state.rpsCoins) {
-                      toast({
-                        title: "Insufficient Balance",
-                        description: "You don't have enough RPS to deposit this amount",
-                        variant: "destructive"
-                      });
-                      return;
-                    }
-
-                    setState(prev => ({
-                      ...prev,
-                      rpsCoins: prev.rpsCoins - amount,
-                      eRPS: prev.eRPS + amount
-                    }));
-
-                    toast({
-                      title: "Deposit Successful",
-                      description: `Deposited ${amount.toLocaleString()} RPS to eRPS`,
-                    });
-                  }}
-                >
-                  +
-                </Button>
-
-                <div className="flex flex-col items-center justify-center mt-2">
-                  <div className="flex items-center gap-1">
-                    <Label className="text-indigo-200 font-semibold">eRPS</Label>
-                    <div className="group relative inline-block cursor-help">
-                      <div className="w-4 h-4 rounded-full bg-indigo-900/40 border border-indigo-400/30 flex items-center justify-center text-xs text-indigo-300 hover:bg-indigo-900/60">
-                        ?
-                      </div>
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 p-2 bg-indigo-900/90 text-indigo-100 text-xs rounded-lg shadow-lg backdrop-blur-sm border border-indigo-500/20 z-50">
-                        <p>Stake your RPS tokens to earn eRPS. Higher stakes and longer durations earn more rewards!</p>
-                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-indigo-900/90 border-r border-b border-indigo-500/20"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-xl font-bold text-indigo-300 mt-2">
-                    {state.eRPS.toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-400">
-                    ≈ ${(state.eRPS * 0.000219).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
-                  </div>
-                </div>
-              </div>
-              
               {/* Balance Containers in RPS Arena */}
-              <div className="space-y-3">
-                {/* Top Row: eRPS and Withdrawable eRPS side by side */}
-                <div className="grid grid-cols-2 gap-3">
-                  {/* eRPS Box */}
-                  <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-500/20">
-                    <div className="text-center">
-                      <Label className="text-sm text-purple-200">eRPS Balance</Label>
-                      <div className="text-lg font-bold text-purple-400 mt-1">
-                        {state.eRPS.toLocaleString()}
-                      </div>
+              <div className="grid grid-cols-2 gap-3">
+                {/* eRPS Box */}
+                <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-500/20">
+                  <div className="text-center">
+                    <Label className="text-sm text-purple-200">eRPS Balance</Label>
+                    <div className="text-lg font-bold text-purple-400 mt-1">
+                      {state.eRPS.toLocaleString()}
                     </div>
-                  </div>
-
-                  {/* Withdrawable eRPS Box */}
-                  <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-xl p-3 backdrop-blur-sm border border-green-500/20">
-                    <div className="text-center">
-                      <Label className="text-sm text-green-200">Withdrawable eRPS</Label>
-                      <div className="text-lg font-bold text-green-400 mt-1">
-                        {state.withdrawableERPS.toLocaleString()}
-                      </div>
+                    <div className="space-y-2 mt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full text-xs bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
+                        onClick={() => setState(prev => ({
+                          ...prev,
+                          swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: true }
+                        }))}
+                      >
+                        +
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full text-xs bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
+                        onClick={() => setState(prev => ({
+                          ...prev,
+                          swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: true }
+                        }))}
+                      >
+                        -
+                      </Button>
                     </div>
                   </div>
                 </div>
 
-                {/* Bottom Row: Quick Cash Out */}
-                <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-300/20">
+                {/* Withdrawable eRPS Box */}
+                <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-xl p-3 backdrop-blur-sm border border-green-500/20">
                   <div className="text-center">
-                    <Label className="text-sm text-purple-200">Quick Cash Out</Label>
-                    <div className="text-xs text-gray-400 mt-1">
-                      Convert eRPS (60%)
+                    <Label className="text-sm text-green-200">Withdrawable eRPS</Label>
+                    <div className="text-lg font-bold text-green-400 mt-1">
+                      {state.withdrawableERPS.toLocaleString()}
                     </div>
-                    <div className="mt-2">
-                      <div className="relative max-w-[200px] mx-auto">
-                        <Input
-                          type="number"
-                          placeholder={`Max: ${state.eRPS}`}
-                          className="h-7 px-2 text-xs bg-purple-900/20 border-purple-500/30 text-white pr-12"
-                          max={state.eRPS}
-                          id="swapAmount"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-7 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200"
-                          onClick={() => {
-                            const input = document.getElementById('swapAmount') as HTMLInputElement;
-                            input.value = state.eRPS.toString();
-                          }}
-                        >
-                          Max
-                        </Button>
-                      </div>
-                    </div>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 w-full text-xs bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
+                      onClick={() => setState(prev => ({
+                        ...prev,
+                        swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: true }
+                      }))}
+                    >
+                      Withdraw
+                    </Button>
                   </div>
                 </div>
               </div>
