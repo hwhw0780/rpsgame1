@@ -28,7 +28,8 @@ export async function POST(request: Request) {
         rpsCoins: 40000,
         stakingRPS: 10000,
         usdtBalance: 0,
-        referralCode: data.referralCode
+        erps: 0,
+        withdrawableErps: 0
       }
     })
 
