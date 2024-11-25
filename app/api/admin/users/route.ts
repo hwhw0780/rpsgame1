@@ -9,6 +9,8 @@ export async function GET() {
         username: true,
         rpsCoins: true,
         usdtBalance: true,
+        eRPS: true,
+        withdrawableERPS: true,
         referralCode: true,
         referralBonus: true
       }
