@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { type NextRequest } from 'next/server'
+
+interface RouteContext {
+  params: {
+    username: string;
+  };
+}
 
 export async function DELETE(
-  request: Request,
-  { params }: { params: { username: string } }
+  _request: NextRequest,
+  context: RouteContext
 ) {
   try {
-    const username = params.username
+    const username = context.params.username
 
     if (username === 'admin') {
       return NextResponse.json(
