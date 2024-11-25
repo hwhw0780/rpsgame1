@@ -12,7 +12,7 @@ export async function getUserStats(userId: string) {
         orderBy: { createdAt: 'desc' },
         take: 10
       },
-      gameHistories: {
+      gameHistory: {
         orderBy: { createdAt: 'desc' },
         take: 10
       }

@@ -5,14 +5,22 @@ export async function GET() {
   try {
     const users = await prisma.user.findMany({
       select: {
-        id: true,
         username: true,
-        role: true,
-        createdAt: true
+        rpsCoins: true,
+        stakingRPS: true,
+        usdtBalance: true,
+        erps: true,
+        withdrawableErps: true,
+        referralCode: true,
+        referredBy: true,
+        referralBonus: true
       }
     })
-    return NextResponse.json(users)
+    return NextResponse.json({ users })
   } catch (error) {
-    return NextResponse.json({ error: 'Error fetching users' }, { status: 500 })
+    return NextResponse.json(
+      { error: 'Failed to fetch users' },
+      { status: 500 }
+    )
   }
 } 
