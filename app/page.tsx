@@ -84,9 +84,11 @@ interface GameState {
     telegram: QuestStatus
     twitter_share: QuestStatus
     twitter_like: QuestStatus
-    lastTwitterShareClaim: string | null
+    twitter_follow: QuestStatus
     daily_rewards: QuestStatus
+    daily_checkin: QuestStatus
     lastDailyRewardsClaim: string | null
+    lastDailyCheckinClaim: string | null
   }
   lastRPStoERPSSwap: string | null
   dailyRPStoERPSLimit: number
@@ -322,9 +324,11 @@ export default function Game() {
       telegram: 'unclaimed',
       twitter_share: 'unclaimed',
       twitter_like: 'unclaimed',
-      lastTwitterShareClaim: null,
+      twitter_follow: 'unclaimed',
       daily_rewards: 'unclaimed',
-      lastDailyRewardsClaim: null
+      daily_checkin: 'unclaimed',
+      lastDailyRewardsClaim: null,
+      lastDailyCheckinClaim: null
     },
     lastRPStoERPSSwap: null,
     dailyRPStoERPSLimit: 5,
@@ -1448,7 +1452,78 @@ export default function Game() {
                       </Button>
                     </div>
 
-                    {/* ... rest of existing quests ... */}
+                    {/* Daily Check-in Quest */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="text-yellow-400 font-bold">Daily Check-in</div>
+                        <div className="text-yellow-400 font-bold">+50 eRPS</div>
+                      </div>
+                      {state.questStatus.daily_checkin === 'completed' && !canClaimDaily() && (
+                        <div className="text-gray-400 text-xs font-mono">
+                          {getTimeUntilNextClaim()}
+                        </div>
+                      )}
+                      {(state.questStatus.daily_checkin === 'unclaimed' || 
+                        (state.questStatus.daily_checkin === 'completed' && canClaimDaily())) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs bg-green-900/40 hover:bg-green-900/60 text-green-200"
+                          onClick={() => {
+                            const now = new Date();
+                            setState(prev => ({
+                              ...prev,
+                              eRPS: prev.eRPS + 50,
+                              questStatus: {
+                                ...prev.questStatus,
+                                daily_checkin: 'completed',
+                                lastDailyCheckinClaim: now.toISOString()
+                              }
+                            }));
+
+                            toast({
+                              title: "Daily Check-in Claimed!",
+                              description: "50 eRPS has been added to your balance.",
+                            });
+                          }}
+                        >
+                          Claim
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Twitter Follow Quest */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="text-yellow-400 font-bold">Follow our Twitter</div>
+                        <div className="text-yellow-400 font-bold">+5000 RPS</div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 px-2 text-xs bg-green-900/40 hover:bg-green-900/60 text-green-200"
+                        onClick={() => {
+                          // Open Twitter in new tab
+                          window.open('https://twitter.com/your_twitter', '_blank');
+                          
+                          setState(prev => ({
+                            ...prev,
+                            rpsCoins: prev.rpsCoins + 5000,
+                            questStatus: {
+                              ...prev.questStatus,
+                              twitter_follow: 'completed'
+                            }
+                          }));
+
+                          toast({
+                            title: "Twitter Follow Reward Claimed!",
+                            description: "5000 RPS has been added to your balance.",
+                          });
+                        }}
+                      >
+                        Claim
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
