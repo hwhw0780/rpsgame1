@@ -233,18 +233,112 @@ export default function AdminPage() {
                       <tr key={user.username} className="border-b border-gray-800">
                         <td className="p-2">{user.username}</td>
                         <td className="p-2">********</td>
-                        <td className="p-2">{user.rpsCoins.toLocaleString()}</td>
-                        <td className="p-2">{user.usdtBalance.toLocaleString()}</td>
-                        <td className="p-2">{user.eRPS.toLocaleString()}</td>
-                        <td className="p-2">{user.withdrawableERPS.toLocaleString()}</td>
                         <td className="p-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setEditingUser(user.username)}
-                          >
-                            Edit
-                          </Button>
+                          {editingUser === user.username ? (
+                            <Input
+                              type="number"
+                              value={user.rpsCoins}
+                              onChange={(e) => {
+                                const updatedUsers = users.map(u => 
+                                  u.username === user.username 
+                                    ? { ...u, rpsCoins: Number(e.target.value) }
+                                    : u
+                                )
+                                setUsers(updatedUsers)
+                              }}
+                              className="w-32"
+                            />
+                          ) : (
+                            user.rpsCoins.toLocaleString()
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {editingUser === user.username ? (
+                            <Input
+                              type="number"
+                              value={user.usdtBalance}
+                              onChange={(e) => {
+                                const updatedUsers = users.map(u => 
+                                  u.username === user.username 
+                                    ? { ...u, usdtBalance: Number(e.target.value) }
+                                    : u
+                                )
+                                setUsers(updatedUsers)
+                              }}
+                              className="w-32"
+                            />
+                          ) : (
+                            user.usdtBalance.toLocaleString()
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {editingUser === user.username ? (
+                            <Input
+                              type="number"
+                              value={user.eRPS}
+                              onChange={(e) => {
+                                const updatedUsers = users.map(u => 
+                                  u.username === user.username 
+                                    ? { ...u, eRPS: Number(e.target.value) }
+                                    : u
+                                )
+                                setUsers(updatedUsers)
+                              }}
+                              className="w-32"
+                            />
+                          ) : (
+                            user.eRPS.toLocaleString()
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {editingUser === user.username ? (
+                            <Input
+                              type="number"
+                              value={user.withdrawableERPS}
+                              onChange={(e) => {
+                                const updatedUsers = users.map(u => 
+                                  u.username === user.username 
+                                    ? { ...u, withdrawableERPS: Number(e.target.value) }
+                                    : u
+                                )
+                                setUsers(updatedUsers)
+                              }}
+                              className="w-32"
+                            />
+                          ) : (
+                            user.withdrawableERPS.toLocaleString()
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {editingUser === user.username ? (
+                            <div className="space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleUpdate(user.username, user)}
+                                className="bg-green-600/20 hover:bg-green-600/40 text-green-400"
+                              >
+                                Save
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setEditingUser(null)}
+                                className="bg-red-600/20 hover:bg-red-600/40 text-red-400"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setEditingUser(user.username)}
+                              className="bg-blue-600/20 hover:bg-blue-600/40 text-blue-400"
+                            >
+                              Edit
+                            </Button>
+                          )}
                         </td>
                       </tr>
                     ))}
