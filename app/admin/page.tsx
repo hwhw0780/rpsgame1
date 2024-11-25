@@ -136,6 +136,31 @@ export default function AdminPage() {
     }
   }
 
+  const handleDelete = async (username: string) => {
+    try {
+      const response = await fetch(`/api/admin/users/${username}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user')
+      }
+
+      toast({
+        title: "Success",
+        description: "User deleted successfully",
+      })
+
+      fetchUsers()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete user",
+        variant: "destructive"
+      })
+    }
+  }
+
   return (
     <div className="container mx-auto p-4 space-y-4">
       <Card>
@@ -194,14 +219,6 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <Label className="text-white">eRPS Balance</Label>
-                  <Input
-                    type="number"
-                    value={newUser.eRPS}
-                    onChange={(e) => setNewUser(prev => ({ ...prev, eRPS: Number(e.target.value) }))}
-                  />
-                </div>
-                <div>
                   <Label className="text-white">Withdrawable eRPS</Label>
                   <Input
                     type="number"
@@ -241,8 +258,6 @@ export default function AdminPage() {
                       <th className="p-2 text-left">Password</th>
                       <th className="p-2 text-left">RPS Balance</th>
                       <th className="p-2 text-left">USDT Balance</th>
-                      <th className="p-2 text-left">eRPS Balance</th>
-                      <th className="p-2 text-left">Withdrawable eRPS</th>
                       <th className="p-2 text-left">Actions</th>
                     </tr>
                   </thead>
@@ -291,44 +306,6 @@ export default function AdminPage() {
                         </td>
                         <td className="p-2">
                           {editingUser === user.username ? (
-                            <Input
-                              type="number"
-                              value={user.eRPS}
-                              onChange={(e) => {
-                                const updatedUsers = users.map(u => 
-                                  u.username === user.username 
-                                    ? { ...u, eRPS: Number(e.target.value) }
-                                    : u
-                                )
-                                setUsers(updatedUsers)
-                              }}
-                              className="w-32"
-                            />
-                          ) : (
-                            user.eRPS.toLocaleString()
-                          )}
-                        </td>
-                        <td className="p-2">
-                          {editingUser === user.username ? (
-                            <Input
-                              type="number"
-                              value={user.withdrawableERPS}
-                              onChange={(e) => {
-                                const updatedUsers = users.map(u => 
-                                  u.username === user.username 
-                                    ? { ...u, withdrawableERPS: Number(e.target.value) }
-                                    : u
-                                )
-                                setUsers(updatedUsers)
-                              }}
-                              className="w-32"
-                            />
-                          ) : (
-                            user.withdrawableERPS.toLocaleString()
-                          )}
-                        </td>
-                        <td className="p-2">
-                          {editingUser === user.username ? (
                             <div className="space-x-2">
                               <Button
                                 variant="outline"
@@ -348,14 +325,36 @@ export default function AdminPage() {
                               </Button>
                             </div>
                           ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setEditingUser(user.username)}
-                              className="bg-blue-600/20 hover:bg-blue-600/40 text-blue-400"
-                            >
-                              Edit
-                            </Button>
+                            <div className="space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setEditingUser(user.username)}
+                                className="bg-blue-600/20 hover:bg-blue-600/40 text-blue-400"
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  if (user.username === 'admin') {
+                                    toast({
+                                      title: "Error",
+                                      description: "Cannot delete admin user",
+                                      variant: "destructive"
+                                    })
+                                    return
+                                  }
+                                  if (window.confirm('Are you sure you want to delete this user?')) {
+                                    handleDelete(user.username)
+                                  }
+                                }}
+                                className="bg-red-600/20 hover:bg-red-600/40 text-red-400"
+                              >
+                                Delete
+                              </Button>
+                            </div>
                           )}
                         </td>
                       </tr>

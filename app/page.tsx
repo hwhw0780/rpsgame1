@@ -752,6 +752,22 @@ export default function Game() {
     };
   }, [state.gameMode]);
 
+  // Add this state
+  const [username, setUsername] = useState<string>('')
+
+  // Add this useEffect
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser)
+        setUsername(userData.username)
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+      }
+    }
+  }, [])
+
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
@@ -764,9 +780,16 @@ export default function Game() {
             height={60}
             className="animate-flip"
           />
-          <span className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
-            RPS League
-          </span>
+          <div className="flex flex-col">
+            <span className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+              RPS League
+            </span>
+            {username && (
+              <p className="text-gray-400 text-sm">
+                Welcome back, <span className="text-purple-400 font-semibold">{username}</span>
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-6">
           <Button 
