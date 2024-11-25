@@ -772,6 +772,14 @@ export default function Game() {
   const [showDepositForm, setShowDepositForm] = useState(false)
   const [depositAmount, setDepositAmount] = useState('')
 
+  // Add the Withdraw Form Modal
+  const [showWithdrawForm, setShowWithdrawForm] = useState(false)
+  const [withdrawData, setWithdrawData] = useState({
+    address: '',
+    network: 'TRC20',  // Default network
+    amount: ''
+  })
+
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
@@ -1136,6 +1144,7 @@ export default function Game() {
               </Button>
               <Button 
                 className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white"
+                onClick={() => setShowWithdrawForm(true)}
               >
                 Withdraw USDT
               </Button>
@@ -2705,6 +2714,110 @@ export default function Game() {
                       description: "Please contact customer service to confirm your deposit.",
                     })
                     setShowDepositForm(false)
+                  }}
+                >
+                  Submit
+                </Button>
+                <Button
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    window.open('https://t.me/yourtelegrambot', '_blank')
+                  }}
+                >
+                  Customer Service
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw Form Modal */}
+      {showWithdrawForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-slate-900 p-6 rounded-xl border border-purple-500/20 w-[400px] space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-purple-400">Withdraw USDT</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowWithdrawForm(false)}
+                className="text-gray-400 hover:text-gray-300"
+              >
+                ✕
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-white">USDT Address</Label>
+                <Input
+                  value={withdrawData.address}
+                  onChange={(e) => setWithdrawData(prev => ({ ...prev, address: e.target.value }))}
+                  placeholder="Enter your USDT address"
+                  className="mt-1 bg-slate-800/50 border-purple-500/20"
+                />
+              </div>
+
+              <div>
+                <Label className="text-white">Network</Label>
+                <select
+                  value={withdrawData.network}
+                  onChange={(e) => setWithdrawData(prev => ({ ...prev, network: e.target.value }))}
+                  className="w-full mt-1 bg-slate-800/50 border border-purple-500/20 rounded-md p-2 text-white"
+                >
+                  <option value="TRC20">TRC20 (Tron Network)</option>
+                  <option value="ERC20">ERC20 (Ethereum Network)</option>
+                  <option value="BEP20">BEP20 (BSC Network)</option>
+                </select>
+              </div>
+
+              <div>
+                <Label className="text-white">Withdraw Amount</Label>
+                <Input
+                  type="number"
+                  value={withdrawData.amount}
+                  onChange={(e) => setWithdrawData(prev => ({ ...prev, amount: e.target.value }))}
+                  placeholder="Enter USDT amount"
+                  className="mt-1 bg-slate-800/50 border-purple-500/20"
+                />
+                <div className="text-sm text-gray-400 mt-1">
+                  Available: {state.usdtBalance.toLocaleString()} USDT
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={() => {
+                    if (!withdrawData.address || !withdrawData.amount) {
+                      toast({
+                        title: "Error",
+                        description: "Please fill in all fields",
+                        variant: "destructive"
+                      })
+                      return
+                    }
+
+                    if (Number(withdrawData.amount) > state.usdtBalance) {
+                      toast({
+                        title: "Error",
+                        description: "Insufficient balance",
+                        variant: "destructive"
+                      })
+                      return
+                    }
+
+                    toast({
+                      title: "Withdrawal Submitted",
+                      description: "Please contact customer service to process your withdrawal.",
+                    })
+                    setShowWithdrawForm(false)
+                    setWithdrawData({
+                      address: '',
+                      network: 'TRC20',
+                      amount: ''
+                    })
                   }}
                 >
                   Submit
