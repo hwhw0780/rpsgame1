@@ -141,10 +141,10 @@ export default function AdminPage() {
         <CardContent>
           {showCreateForm && (
             <div className="mb-6 p-4 bg-slate-800 rounded-lg border border-slate-700">
-              <h3 className="text-lg font-semibold mb-4">Create New User</h3>
+              <h3 className="text-lg font-semibold mb-4 text-white">Create New User</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Username</Label>
+                  <Label className="text-white">Username</Label>
                   <Input
                     value={newUser.username}
                     onChange={(e) => setNewUser(prev => ({ ...prev, username: e.target.value }))}
@@ -152,7 +152,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <Label>Password</Label>
+                  <Label className="text-white">Password</Label>
                   <Input
                     type="password"
                     value={newUser.password}
@@ -161,7 +161,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <Label>RPS Balance</Label>
+                  <Label className="text-white">RPS Balance</Label>
                   <Input
                     type="number"
                     value={newUser.rpsCoins}
@@ -169,7 +169,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <Label>USDT Balance</Label>
+                  <Label className="text-white">USDT Balance</Label>
                   <Input
                     type="number"
                     value={newUser.usdtBalance}
@@ -177,7 +177,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <Label>eRPS Balance</Label>
+                  <Label className="text-white">eRPS Balance</Label>
                   <Input
                     type="number"
                     value={newUser.eRPS}
@@ -185,7 +185,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div>
-                  <Label>Withdrawable eRPS</Label>
+                  <Label className="text-white">Withdrawable eRPS</Label>
                   <Input
                     type="number"
                     value={newUser.withdrawableERPS}
@@ -317,7 +317,7 @@ export default function AdminPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleUpdate(user.username, user)}
-                                className="bg-green-600/20 hover:bg-green-600/40 text-white"
+                                className="bg-green-600/20 hover:bg-green-600/40 text-green-400"
                               >
                                 Save
                               </Button>
@@ -325,7 +325,7 @@ export default function AdminPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setEditingUser(null)}
-                                className="bg-red-600/20 hover:bg-red-600/40 text-white"
+                                className="bg-red-600/20 hover:bg-red-600/40 text-red-400"
                               >
                                 Cancel
                               </Button>
@@ -335,7 +335,7 @@ export default function AdminPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => setEditingUser(user.username)}
-                              className="bg-blue-600/20 hover:bg-blue-600/40 text-white"
+                              className="bg-blue-600/20 hover:bg-blue-600/40 text-blue-400"
                             >
                               Edit
                             </Button>
