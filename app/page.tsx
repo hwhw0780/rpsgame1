@@ -375,7 +375,8 @@ export default function Game() {
           if (currentUser) {
             setState(prev => ({
               ...prev,
-              rpsCoins: currentUser.rpsCoins || 0
+              rpsCoins: currentUser.rpsCoins || 0,
+              usdtBalance: currentUser.usdtBalance || 0  // Add this line
             }))
           }
         }
