@@ -1389,83 +1389,6 @@ export default function Game() {
                   </div>
                 )}
               </div>
-              
-              {/* Replace the Buy Skin box with eRPS Swap box */}
-              <div className="text-center p-4 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-purple-300/20">
-                <Label className="text-purple-200 font-semibold">Quick Cash Out</Label>
-                <div className="text-sm text-gray-400 mt-1 mb-2">
-                  Convert eRPS to Withdrawable eRPS
-                  <br />
-                  (Receive 60%)
-                </div>
-                <div className="flex flex-col gap-2">
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      placeholder={`Max: ${state.eRPS}`}
-                      className="h-6 px-2 text-xs bg-purple-900/20 border-purple-500/30 text-white pr-16"
-                      max={state.eRPS}
-                      onChange={(e) => {
-                        const value = Number(e.target.value);
-                        if (value > state.eRPS) {
-                          e.target.value = state.eRPS.toString();
-                        }
-                      }}
-                      id="swapAmount"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-6 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200 rounded-l-none"
-                      onClick={() => {
-                        const input = document.getElementById('swapAmount') as HTMLInputElement;
-                        input.value = state.eRPS.toString();
-                      }}
-                    >
-                      Max
-                    </Button>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="h-6 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200 flex items-center gap-1 rounded-md border border-purple-500/30"
-                    onClick={() => {
-                      const amount = Number((document.getElementById('swapAmount') as HTMLInputElement).value);
-                      if (amount <= 0 || amount > state.eRPS) {
-                        toast({
-                          title: "Invalid Amount",
-                          description: "Please enter a valid amount to swap.",
-                          variant: "destructive"
-                        });
-                        return;
-                      }
-
-                      const withdrawableAmount = Math.floor(amount * 0.6); // 60% conversion rate
-
-                      setState(prev => ({
-                        ...prev,
-                        eRPS: prev.eRPS - amount,
-                        withdrawableERPS: prev.withdrawableERPS + withdrawableAmount
-                      }));
-
-                      toast({
-                        title: "Swap Successful",
-                        description: `Swapped ${amount.toLocaleString()} eRPS to ${withdrawableAmount.toLocaleString()} Withdrawable eRPS`,
-                      });
-
-                      (document.getElementById('swapAmount') as HTMLInputElement).value = '';
-                    }}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
-                      <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
-                      <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
-                      <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
-                    </svg>
-                    <span>Swap</span>
-                  </Button>
-                </div>
-              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -2517,7 +2440,7 @@ export default function Game() {
                 className="text-gray-400 hover:text-gray-300"
                 onClick={() => setState(prev => ({ ...prev, unstakeDialogOpen: false }))}
               >
-                ✕
+                ���
               </Button>
             </div>
 
