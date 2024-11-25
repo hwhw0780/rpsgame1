@@ -861,7 +861,7 @@ export default function Game() {
                         variant="outline" 
                         size="sm"
                         className="bg-blue-900/20 border-blue-500/20 hover:bg-blue-900/40 text-blue-400"
-                        onClick={() => {
+                        onClick={async () => {
                           const amount = Number(state.swapAmount)
                           if (amount <= 0 || amount > state.rpsCoins) {
                             toast({
@@ -872,20 +872,48 @@ export default function Game() {
                             return
                           }
 
-                          const usdtAmount = amount * 0.000219  // Updated rate
+                          const usdtAmount = amount * 0.000219
 
-                          setState(prev => ({
-                            ...prev,
-                            rpsCoins: prev.rpsCoins - amount,
-                            usdtBalance: prev.usdtBalance + usdtAmount,
-                            swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false },
-                            swapAmount: ''
-                          }))
+                          try {
+                            const storedUser = localStorage.getItem('user')
+                            if (!storedUser) return
+                            const { username } = JSON.parse(storedUser)
 
-                          toast({
-                            title: "Swap Successful",
-                            description: `Swapped ${amount.toLocaleString()} RPS to ${usdtAmount.toFixed(2)} USDT`,
-                          })
+                            const response = await fetch('/api/users/balance', {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json'
+                              },
+                              body: JSON.stringify({
+                                username,
+                                rpsCoins: state.rpsCoins - amount,
+                                usdtBalance: state.usdtBalance + usdtAmount
+                              })
+                            })
+
+                            if (!response.ok) {
+                              throw new Error('Failed to update balance')
+                            }
+
+                            setState(prev => ({
+                              ...prev,
+                              rpsCoins: prev.rpsCoins - amount,
+                              usdtBalance: prev.usdtBalance + usdtAmount,
+                              swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false },
+                              swapAmount: ''
+                            }))
+
+                            toast({
+                              title: "Swap Successful",
+                              description: `Swapped ${amount.toLocaleString()} RPS to ${usdtAmount.toFixed(2)} USDT`,
+                            })
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to complete swap",
+                              variant: "destructive"
+                            })
+                          }
                         }}
                       >
                         Confirm
@@ -1004,7 +1032,7 @@ export default function Game() {
                         variant="outline" 
                         size="sm"
                         className="bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
-                        onClick={() => {
+                        onClick={async () => {
                           const amount = Number(state.swapAmount)
                           if (amount <= 0 || amount > state.usdtBalance) {
                             toast({
@@ -1015,20 +1043,48 @@ export default function Game() {
                             return
                           }
 
-                          const rpsAmount = amount / 0.000219  // Updated rate
+                          const rpsAmount = amount / 0.000219
 
-                          setState(prev => ({
-                            ...prev,
-                            usdtBalance: prev.usdtBalance - amount,
-                            rpsCoins: prev.rpsCoins + rpsAmount,
-                            swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: false },
-                            swapAmount: ''
-                          }))
+                          try {
+                            const storedUser = localStorage.getItem('user')
+                            if (!storedUser) return
+                            const { username } = JSON.parse(storedUser)
 
-                          toast({
-                            title: "Swap Successful",
-                            description: `Swapped ${amount} USDT to ${rpsAmount.toLocaleString()} RPS`,
-                          })
+                            const response = await fetch('/api/users/balance', {
+                              method: 'PUT',
+                              headers: {
+                                'Content-Type': 'application/json'
+                              },
+                              body: JSON.stringify({
+                                username,
+                                rpsCoins: state.rpsCoins + rpsAmount,
+                                usdtBalance: state.usdtBalance - amount
+                              })
+                            })
+
+                            if (!response.ok) {
+                              throw new Error('Failed to update balance')
+                            }
+
+                            setState(prev => ({
+                              ...prev,
+                              usdtBalance: prev.usdtBalance - amount,
+                              rpsCoins: prev.rpsCoins + rpsAmount,
+                              swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: false },
+                              swapAmount: ''
+                            }))
+
+                            toast({
+                              title: "Swap Successful",
+                              description: `Swapped ${amount} USDT to ${rpsAmount.toLocaleString()} RPS`,
+                            })
+                          } catch (error) {
+                            toast({
+                              title: "Error",
+                              description: "Failed to complete swap",
+                              variant: "destructive"
+                            })
+                          }
                         }}
                       >
                         Confirm
