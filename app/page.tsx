@@ -657,7 +657,7 @@ export default function Game() {
     
     // Calculate remaining time
     const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     
     // Format with leading zeros
@@ -2204,7 +2204,7 @@ export default function Game() {
                 <path d="M4 19h16"/>
                 <path d="M4 9h16"/>
                 <path d="M12 4v5"/>
-                <path d="m8 8 4-4 4 4-4"/>
+                <path d="m8 8 4-4 4 4-4-4-4"/>
                 <path d="M8 15h0"/>
                 <path d="M16 15h0"/>
                 <path d="M12 15h0"/>
