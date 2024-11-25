@@ -2,14 +2,21 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { NextRequest } from 'next/server'
 
+type Context = {
+  params: {
+    username: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { username: string } }
+  context: Context
 ) {
   try {
     const user = await prisma.user.findUnique({
       where: { 
-        username: params.username 
+        username: context.params.username 
       },
       select: {
         id: true,
