@@ -18,6 +18,23 @@ export async function POST(request: Request) {
       )
     }
 
+    // Validate referral code if provided
+    if (data.referralCode) {
+      const referrer = await prisma.user.findFirst({
+        where: { referralCode: data.referralCode }
+      })
+
+      if (!referrer) {
+        return NextResponse.json(
+          { error: 'Invalid referral code' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // Generate unique referral code for new user
+    const newReferralCode = Math.random().toString(36).substring(2, 8).toUpperCase()
+
     // Create new user
     const hashedPassword = await bcrypt.hash(data.password, 10)
     const user = await prisma.user.create({
@@ -29,7 +46,9 @@ export async function POST(request: Request) {
         stakingRPS: 10000,
         usdtBalance: 0,
         eRPS: 0,
-        withdrawableERPS: 0
+        withdrawableERPS: 0,
+        referralCode: newReferralCode,
+        referredBy: data.referralCode || null
       }
     })
 

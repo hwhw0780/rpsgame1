@@ -13,6 +13,7 @@ export async function GET() {
         eRPS: true,
         withdrawableERPS: true,
         referralCode: true,
+        referredBy: true,
         referralBonus: true
       }
     })
