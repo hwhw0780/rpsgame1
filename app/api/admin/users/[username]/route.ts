@@ -1,12 +1,18 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+interface Context {
+  params: {
+    username: string;
+  };
+}
+
 export async function DELETE(
-  request: Request,
-  { params }: { params: Record<string, string> }
+  _request: Request,
+  context: Context
 ) {
   try {
-    const username = params.username
+    const { username } = context.params
 
     if (username === 'admin') {
       return NextResponse.json(
