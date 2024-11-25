@@ -21,8 +21,14 @@ export async function POST(request: Request) {
     // Validate referral code if provided
     let referrer = null
     if (data.referralCode) {
-      referrer = await prisma.user.findUnique({
-        where: { referralCode: data.referralCode }
+      referrer = await prisma.user.findFirst({
+        where: {
+          username: data.username,
+          OR: [
+            { role: 'user' },
+            { role: 'admin' }
+          ]
+        }
       })
 
       if (!referrer) {
