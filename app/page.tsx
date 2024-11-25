@@ -783,48 +783,52 @@ export default function Game() {
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
-      <nav className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-6">
+      <nav className="flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 mb-4">
+        {/* Logo and Welcome Section */}
+        <div className="flex items-center gap-4 sm:gap-6">
           <Image 
             src="/rpslogo.png" 
             alt="RPS League" 
-            width={60}
-            height={60}
-            className="animate-flip"
+            width={50}
+            height={50}
+            className="animate-flip w-[40px] h-[40px] sm:w-[50px] sm:h-[50px]"
           />
           <div className="flex flex-col">
-            <span className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+            <span className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
               RPS League
             </span>
             {username && (
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-xs sm:text-sm">
                 Welcome back, <span className="text-purple-400 font-semibold">{username}</span>
               </p>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-6">
+
+        {/* Navigation Buttons */}
+        <div className="flex items-center gap-2 sm:gap-4">
           <Button 
             onClick={() => window.open('/whitepaper.pdf', '_blank')}
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-6 py-2 text-lg"
+            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white px-3 sm:px-6 py-1 sm:py-2 text-sm sm:text-base h-8 sm:h-10"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-1 sm:mr-2 hidden sm:inline">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <path d="M14 2v6h6"/>
               <path d="M16 13H8"/>
               <path d="M16 17H8"/>
               <path d="M10 9H8"/>
             </svg>
-            Whitepaper
+            WP
           </Button>
           <Button 
             onClick={() => {
               localStorage.removeItem('user')
               window.location.href = '/login'
             }}
-            className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-6 py-2 text-lg"
+            className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white px-3 sm:px-6 py-1 sm:py-2 text-sm sm:text-base h-8 sm:h-10"
           >
-            Disconnect
+            <span className="hidden sm:inline">Disconnect</span>
+            <span className="sm:hidden">Exit</span>
           </Button>
         </div>
       </nav>
