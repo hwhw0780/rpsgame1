@@ -1074,6 +1074,7 @@ export default function Game() {
             <div className="grid grid-cols-3 gap-4 pt-4">
               <Button 
                 className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+                onClick={() => setShowDepositForm(true)}
               >
                 Deposit USDT
               </Button>
