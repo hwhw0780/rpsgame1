@@ -3,22 +3,8 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const username = searchParams.get('username')
-
-    if (!username) {
-      return NextResponse.json(
-        { error: 'Username is required' },
-        { status: 400 }
-      )
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { 
-        username: username 
-      },
+    const users = await prisma.user.findMany({
       select: {
-        id: true,
         username: true,
         role: true,
         rpsCoins: true,
@@ -30,19 +16,11 @@ export async function GET(request: Request) {
         createdAt: true
       }
     })
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-
-    return NextResponse.json({ user })
+    return NextResponse.json({ users })
   } catch (error) {
-    console.error('Error fetching user:', error)
+    console.error('Error fetching users:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch user data' },
+      { error: 'Failed to fetch users' },
       { status: 500 }
     )
   }

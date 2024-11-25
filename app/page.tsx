@@ -362,24 +362,22 @@ export default function Game() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Get user from localStorage
-        const storedUser = localStorage.getItem('user')
-        if (!storedUser) return
-
-        const { username } = JSON.parse(storedUser)
-
-        // Fetch latest user data
-        const response = await fetch(`/api/users/${username}`)
+        const response = await fetch('/api/users')
         const data = await response.json()
-
+        
         if (response.ok) {
-          // Update localStorage with latest data
-          localStorage.setItem('user', JSON.stringify(data.user))
-          // Update state with latest RPS balance
-          setState(prev => ({
-            ...prev,
-            rpsCoins: data.user.rpsCoins || 0
-          }))
+          const storedUser = localStorage.getItem('user')
+          if (!storedUser) return
+          
+          const { username } = JSON.parse(storedUser)
+          const currentUser = data.users.find((u: any) => u.username === username)
+          
+          if (currentUser) {
+            setState(prev => ({
+              ...prev,
+              rpsCoins: currentUser.rpsCoins || 0
+            }))
+          }
         }
       } catch (error) {
         console.error('Error fetching user data:', error)
@@ -387,7 +385,7 @@ export default function Game() {
     }
 
     fetchUserData()
-  }, []) // Run once when component mounts
+  }, [])
 
   // Update useEffect for currency rates
   useEffect(() => {
