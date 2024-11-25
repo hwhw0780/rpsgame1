@@ -29,8 +29,14 @@ export default function AdminPage() {
     eRPS: 0,
     withdrawableERPS: 0
   })
+  const [username, setUsername] = useState<string>('')
 
   useEffect(() => {
+    const user = localStorage.getItem('user')
+    if (user) {
+      const userData = JSON.parse(user)
+      setUsername(userData.username)
+    }
     fetchUsers()
   }, [])
 
@@ -130,7 +136,10 @@ export default function AdminPage() {
     <div className="container mx-auto p-4 space-y-4">
       <Card>
         <div className="flex items-center justify-between p-6 border-b border-gray-800">
-          <CardTitle className="text-2xl font-bold">Admin Dashboard</CardTitle>
+          <div>
+            <CardTitle className="text-2xl font-bold">Admin Dashboard</CardTitle>
+            <p className="text-gray-400 mt-1">Welcome back, <span className="text-purple-400">{username}</span></p>
+          </div>
           <Button 
             onClick={() => setShowCreateForm(true)}
             className="bg-green-600 hover:bg-green-700 text-white"
