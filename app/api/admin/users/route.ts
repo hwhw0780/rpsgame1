@@ -9,8 +9,6 @@ export async function GET() {
         rpsCoins: true,
         stakingRPS: true,
         usdtBalance: true,
-        eRPS: true,
-        withdrawableERPS: true,
         role: true,
         createdAt: true
       }
@@ -30,34 +28,16 @@ export async function PUT(request: Request) {
     const data = await request.json()
     const { username, ...updates } = data
 
-    // Log the incoming update data
-    console.log('Updating user:', username)
-    console.log('Update data:', updates)
-
-    // Validate the numbers
-    const updateData = {
-      rpsCoins: Math.max(0, Number(updates.rpsCoins) || 0),
-      usdtBalance: Math.max(0, Number(updates.usdtBalance) || 0),
-      eRPS: Math.max(0, Number(updates.eRPS) || 0),
-      withdrawableERPS: Math.max(0, Number(updates.withdrawableERPS) || 0),
-    }
-
-    // Update user data
     const user = await prisma.user.update({
-      where: { 
-        username: username 
-      },
-      data: updateData
+      where: { username },
+      data: {
+        rpsCoins: Number(updates.rpsCoins),
+        usdtBalance: Number(updates.usdtBalance)
+      }
     })
-
-    // Log the result
-    console.log('Update successful:', user)
 
     const { password: _, ...userData } = user
-    return NextResponse.json({ 
-      user: userData,
-      message: 'User updated successfully'
-    })
+    return NextResponse.json({ user: userData })
   } catch (error) {
     console.error('Error updating user:', error)
     return NextResponse.json(

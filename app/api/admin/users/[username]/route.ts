@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { NextRequest } from 'next/server'
 
 export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: { username: string } }
+  request: Request,
+  { params }: { params: Record<string, string> }
 ) {
   try {
     const username = params.username
