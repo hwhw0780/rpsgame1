@@ -1363,238 +1363,94 @@ export default function Game() {
                 </div>
 
                 {/* Quest Rewards Section */}
-                <div className="bg-gradient-to-br from-yellow-900/20 to-amber-900/20 rounded-xl p-6 border border-yellow-500/20">
-                  <h3 className="text-xl font-bold text-yellow-400 mb-4 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                    </svg>
-                    Quest Rewards
-                  </h3>
-                  <div className="space-y-3">
-                    {/* Daily Staking Rewards Quest - First Position */}
-                    <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all">
-                      <div className="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-400">
-                          <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z"/>
-                          <path d="M12 2v2"/>
-                          <path d="M12 20v2"/>
-                          <path d="m4.93 4.93 1.41 1.41"/>
-                          <path d="m17.66 17.66 1.41 1.41"/>
-                          <path d="M2 12h2"/>
-                          <path d="M20 12h2"/>
-                          <path d="m6.34 17.66-1.41 1.41"/>
-                          <path d="m19.07 4.93-1.41 1.41"/>
-                        </svg>
-                        <div>
-                          <span>Daily Staking Rewards</span>
-                          <span className="ml-2 text-xs text-green-400">(Daily Quest)</span>
-                        </div>
-                      </div>
+                <Card className="bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)] hover:shadow-[0_0_30px_rgba(234,179,8,0.2)] transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-2xl font-bold bg-gradient-to-r from-yellow-400 to-amber-200 text-transparent bg-clip-text">
+                      Quest Rewards
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Existing Daily Rewards */}
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
+                        <div className="text-yellow-400 font-bold">Daily Rewards</div>
                         <div className="text-yellow-400 font-bold">+{calculateDailyRewards().toFixed(2)} eRPS</div>
-                        {state.questStatus.daily_rewards === 'completed' && !canClaimDaily() && (
-                          <div className="text-gray-400 text-xs font-mono">
-                            {getTimeUntilNextClaim()}
-                          </div>
-                        )}
-                        {(state.questStatus.daily_rewards === 'unclaimed' || 
-                          (state.questStatus.daily_rewards === 'completed' && canClaimDaily())) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-green-900/40 hover:bg-green-900/60 text-green-200"
-                            onClick={() => {
-                              if (calculateDailyRewards() <= 0) {
-                                toast({
-                                  title: "No Rewards Available",
-                                  description: "You need to stake RPS to earn daily rewards.",
-                                  variant: "destructive"
-                                });
-                                return;
-                              }
-
-                              const rewards = calculateDailyRewards();
-                              const now = new Date();
-                              
-                              setState(prev => ({
-                                ...prev,
-                                eRPS: prev.eRPS + rewards,
-                                questStatus: {
-                                  ...prev.questStatus,
-                                  daily_rewards: 'completed',
-                                  lastDailyRewardsClaim: now.toISOString() // Store current time
-                                }
-                              }));
-
-                              toast({
-                                title: "Daily Rewards Claimed!",
-                                description: `${rewards.toFixed(2)} eRPS has been added to your balance.`,
-                              });
-                            }}
-                          >
-                            Claim
-                          </Button>
-                        )}
                       </div>
-                    </div>
-
-                    {/* Twitter Share Quest - Daily Quest */}
-                    <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all">
-                      <div className="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
-                          <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
-                        </svg>
-                        <div>
-                          <span>Share To Twitter</span>
-                          <span className="ml-2 text-xs text-blue-400">(Daily Quest)</span>
+                      {state.questStatus.daily_rewards === 'completed' && !canClaimDaily() && (
+                        <div className="text-gray-400 text-xs font-mono">
+                          {getTimeUntilNextClaim()}
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-yellow-400 font-bold">+50 eRPS</div>
-                        {state.questStatus.twitter_share === 'pending' && (
-                          <div className="flex items-center gap-2 text-blue-400">
-                            <div className="animate-spin">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                              </svg>
-                            </div>
-                            <span className="text-xs italic">Verifying share (50s)...</span>
-                          </div>
-                        )}
-                        {state.questStatus.twitter_share === 'completed' && !canClaimDaily() && (
-                          <div className="text-gray-400 text-xs">Next claim available tomorrow</div>
-                        )}
-                        {(state.questStatus.twitter_share === 'unclaimed' || 
-                          (state.questStatus.twitter_share === 'completed' && canClaimDaily())) && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-blue-900/40 hover:bg-blue-900/60 text-blue-200"
-                            onClick={() => {
-                              window.open('YOUR_TWITTER_SHARE_LINK', '_blank')
-                              setState(prev => ({
-                                ...prev,
-                                questStatus: { 
-                                  ...prev.questStatus, 
-                                  twitter_share: 'pending',
-                                }
-                              }))
-                            }}
-                          >
-                            Share
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Telegram Quest - Now Second */}
-                    <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all">
-                      <div className="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
-                          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
-                        </svg>
-                        <span>Follow Telegram</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-yellow-400 font-bold">+5000 eRPS</div>
-                        {state.questStatus.telegram === 'pending' && (
-                          <div className="flex items-center gap-2 text-blue-400">
-                            <div className="animate-spin">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                              </svg>
-                            </div>
-                            <span className="text-xs italic">Verifying subscription (50s)...</span>
-                          </div>
-                        )}
-                        {state.questStatus.telegram === 'verified' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-green-900/40 hover:bg-green-900/60 text-green-200"
-                            onClick={() => {
-                              setState(prev => ({
-                                ...prev,
-                                eRPS: prev.eRPS + 5000,
-                                questStatus: {
-                                  ...prev.questStatus,
-                                  telegram: 'completed'
-                                }
-                              }));
+                      )}
+                      {(state.questStatus.daily_rewards === 'unclaimed' || 
+                        (state.questStatus.daily_rewards === 'completed' && canClaimDaily())) && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs bg-green-900/40 hover:bg-green-900/60 text-green-200"
+                          onClick={() => {
+                            if (calculateDailyRewards() <= 0) {
                               toast({
-                                title: "Rewards Claimed!",
-                                description: "5000 eRPS has been added to your balance.",
+                                title: "No Rewards Available",
+                                description: "You need to stake RPS to earn daily rewards.",
+                                variant: "destructive"
                               });
-                            }}
-                          >
-                            Claim Rewards
-                          </Button>
-                        )}
-                        {state.questStatus.telegram === 'completed' && (
-                          <div className="text-green-400 text-sm">Completed ✓</div>
-                        )}
-                        {state.questStatus.telegram === 'unclaimed' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-blue-900/40 hover:bg-blue-900/60 text-blue-200"
-                            onClick={() => {
-                              window.open('YOUR_TELEGRAM_LINK', '_blank');
-                              setState(prev => ({
-                                ...prev,
-                                questStatus: { ...prev.questStatus, telegram: 'pending' }
-                              }));
-                            }}
-                          >
-                            Follow
-                          </Button>
-                        )}
-                      </div>
+                              return;
+                            }
+
+                            const rewards = calculateDailyRewards();
+                            const now = new Date();
+                            
+                            setState(prev => ({
+                              ...prev,
+                              eRPS: prev.eRPS + rewards,
+                              questStatus: {
+                                ...prev.questStatus,
+                                daily_rewards: 'completed',
+                                lastDailyRewardsClaim: now.toISOString() // Store current time
+                              }
+                            }));
+
+                            toast({
+                              title: "Daily Rewards Claimed!",
+                              description: `${rewards.toFixed(2)} eRPS has been added to your balance.`,
+                            });
+                          }}
+                        >
+                          Claim
+                        </Button>
+                      )}
                     </div>
 
-                    {/* Twitter Like Quest remains last */}
-                    <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg hover:bg-slate-800/70 transition-all">
-                      <div className="flex items-center gap-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-400">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                        </svg>
-                        <span>Like our Twitter</span>
-                      </div>
+                    {/* New Referral Bonus Quest */}
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="text-yellow-400 font-bold">+5000 eRPS</div>
-                        {state.questStatus.twitter_like === 'pending' && (
-                          <div className="flex items-center gap-2 text-blue-400">
-                            <div className="animate-spin">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-                              </svg>
-                            </div>
-                            <span className="text-xs italic">Verifying like (50s)...</span>
-                          </div>
-                        )}
-                        {state.questStatus.twitter_like === 'completed' && (
-                          <div className="text-green-400 text-sm">Completed ✓</div>
-                        )}
-                        {state.questStatus.twitter_like === 'unclaimed' && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 text-xs bg-blue-900/40 hover:bg-blue-900/60 text-blue-200"
-                            onClick={() => {
-                              window.open('YOUR_TWITTER_LIKE_LINK', '_blank')
-                              setState(prev => ({
-                                ...prev,
-                                questStatus: { ...prev.questStatus, twitter_like: 'pending' }
-                              }))
-                            }}
-                          >
-                            Like
-                          </Button>
-                        )}
+                        <div className="text-yellow-400 font-bold">Referral Bonus</div>
+                        <div className="text-yellow-400 font-bold">+0.00 USDT</div>
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-yellow-900/20 border-yellow-500/20 hover:bg-yellow-900/40 text-yellow-400"
+                        onClick={() => {
+                          // Add USDT to balance
+                          setState(prev => ({
+                            ...prev,
+                            usdtBalance: prev.usdtBalance + 0.00  // You can change this amount
+                          }));
+                          
+                          toast({
+                            title: "Referral Bonus Claimed",
+                            description: "0.00 USDT has been added to your balance",
+                          });
+                        }}
+                      >
+                        Claim
+                      </Button>
                     </div>
-                  </div>
-                </div>
+
+                    {/* ... rest of existing quests ... */}
+                  </CardContent>
+                </Card>
               </div>
             )}
 
