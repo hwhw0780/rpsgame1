@@ -1,25 +1,17 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { type NextRequest } from 'next/server'
-
-interface RouteParams {
-  params: {
-    username: string
-  }
-}
 
 export async function GET(
-  _request: NextRequest,
-  context: RouteParams
+  request: Request,
+  { params }: { params: { username: string } }
 ) {
   try {
-    const { username } = context.params
-    
     const user = await prisma.user.findUnique({
       where: { 
-        username: username 
+        username: params.username 
       },
       select: {
+        id: true,
         username: true,
         role: true,
         rpsCoins: true,
