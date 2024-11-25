@@ -1174,155 +1174,61 @@ export default function Game() {
                 </div>
               </div>
               
-              {/* Withdrawable eRPS Box */}
-              <div className="text-center p-4 bg-gradient-to-br from-emerald-600/20 to-green-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-emerald-300/20">
-                <div className="flex items-center justify-center">
-                  <Label className="text-emerald-200 font-semibold">Withdrawable eRPS</Label>
-                </div>
-                <div className="text-xl font-bold text-emerald-300 mt-1">
-                  {state.withdrawableERPS.toLocaleString()} points
-                </div>
-                {state.withdrawableERPS > 0 && (
-                  <div className="flex flex-col gap-2 mt-2">
-                    <div className="relative">
-                      <Input
-                        type="number"
-                        placeholder={`Max: ${state.withdrawableERPS}`}
-                        className="h-6 px-2 text-xs bg-emerald-900/20 border-emerald-500/30 text-white pr-16"
-                        max={state.withdrawableERPS}
-                        onChange={(e) => {
-                          const value = Number(e.target.value);
-                          if (value > state.withdrawableERPS) {
-                            e.target.value = state.withdrawableERPS.toString();
-                          }
-                        }}
-                        id="withdrawAmount"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-6 px-2 text-xs bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-200 rounded-l-none"
-                        onClick={() => {
-                          const input = document.getElementById('withdrawAmount') as HTMLInputElement;
-                          input.value = state.withdrawableERPS.toString();
-                        }}
-                      >
-                        Max
-                      </Button>
+              {/* Balance Containers in RPS Arena */}
+              <div className="space-y-3">
+                {/* Top Row: eRPS and Withdrawable eRPS side by side */}
+                <div className="grid grid-cols-2 gap-3">
+                  {/* eRPS Box */}
+                  <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-500/20">
+                    <div className="text-center">
+                      <Label className="text-sm text-purple-200">eRPS Balance</Label>
+                      <div className="text-lg font-bold text-purple-400 mt-1">
+                        {state.eRPS.toLocaleString()}
+                      </div>
                     </div>
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      className="h-6 px-2 text-xs bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-200 flex items-center gap-1 rounded-md border border-emerald-500/30"
-                      onClick={() => {
-                        const amount = Number((document.getElementById('withdrawAmount') as HTMLInputElement).value);
-                        if (amount <= 0 || amount > state.withdrawableERPS) {
-                          toast({
-                            title: "Invalid Amount",
-                            description: "Please enter a valid amount to withdraw.",
-                            variant: "destructive"
-                          });
-                          return;
-                        }
-
-                        setState(prev => ({
-                          ...prev,
-                          rpsCoins: prev.rpsCoins + amount,
-                          withdrawableERPS: prev.withdrawableERPS - amount
-                        }));
-
-                        toast({
-                          title: "Withdrawal Successful",
-                          description: `${amount.toLocaleString()} eRPS has been added to your RPS balance.`,
-                        });
-
-                        (document.getElementById('withdrawAmount') as HTMLInputElement).value = '';
-                      }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 5v14"/>
-                        <path d="M19 12l-7 7-7-7"/>
-                      </svg>
-                      <span>Withdraw</span>
-                    </Button>
                   </div>
-                )}
-              </div>
-              
-              {/* Replace the Buy Skin box with eRPS Swap box */}
-              <div className="text-center p-4 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-purple-300/20">
-                <Label className="text-purple-200 font-semibold">Quick Cash Out</Label>
-                <div className="text-sm text-gray-400 mt-1 mb-2">
-                  Convert eRPS to Withdrawable eRPS
-                  <br />
-                  (Receive 60%)
+
+                  {/* Withdrawable eRPS Box */}
+                  <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-xl p-3 backdrop-blur-sm border border-green-500/20">
+                    <div className="text-center">
+                      <Label className="text-sm text-green-200">Withdrawable eRPS</Label>
+                      <div className="text-lg font-bold text-green-400 mt-1">
+                        {state.withdrawableERPS.toLocaleString()}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <div className="relative">
-                    <Input
-                      type="number"
-                      placeholder={`Max: ${state.eRPS}`}
-                      className="h-6 px-2 text-xs bg-purple-900/20 border-purple-500/30 text-white pr-16"
-                      max={state.eRPS}
-                      onChange={(e) => {
-                        const value = Number(e.target.value);
-                        if (value > state.eRPS) {
-                          e.target.value = state.eRPS.toString();
-                        }
-                      }}
-                      id="swapAmount"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-6 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200 rounded-l-none"
-                      onClick={() => {
-                        const input = document.getElementById('swapAmount') as HTMLInputElement;
-                        input.value = state.eRPS.toString();
-                      }}
-                    >
-                      Max
-                    </Button>
+
+                {/* Bottom Row: Quick Cash Out */}
+                <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-300/20">
+                  <div className="text-center">
+                    <Label className="text-sm text-purple-200">Quick Cash Out</Label>
+                    <div className="text-xs text-gray-400 mt-1">
+                      Convert eRPS (60%)
+                    </div>
+                    <div className="mt-2">
+                      <div className="relative max-w-[200px] mx-auto">
+                        <Input
+                          type="number"
+                          placeholder={`Max: ${state.eRPS}`}
+                          className="h-7 px-2 text-xs bg-purple-900/20 border-purple-500/30 text-white pr-12"
+                          max={state.eRPS}
+                          id="swapAmount"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-7 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200"
+                          onClick={() => {
+                            const input = document.getElementById('swapAmount') as HTMLInputElement;
+                            input.value = state.eRPS.toString();
+                          }}
+                        >
+                          Max
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    className="h-6 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200 flex items-center gap-1 rounded-md border border-purple-500/30"
-                    onClick={() => {
-                      const amount = Number((document.getElementById('swapAmount') as HTMLInputElement).value);
-                      if (amount <= 0 || amount > state.eRPS) {
-                        toast({
-                          title: "Invalid Amount",
-                          description: "Please enter a valid amount to swap.",
-                          variant: "destructive"
-                        });
-                        return;
-                      }
-
-                      const withdrawableAmount = Math.floor(amount * 0.6); // 60% conversion rate
-
-                      setState(prev => ({
-                        ...prev,
-                        eRPS: prev.eRPS - amount,
-                        withdrawableERPS: prev.withdrawableERPS + withdrawableAmount
-                      }));
-
-                      toast({
-                        title: "Swap Successful",
-                        description: `Swapped ${amount.toLocaleString()} eRPS to ${withdrawableAmount.toLocaleString()} Withdrawable eRPS`,
-                      });
-
-                      (document.getElementById('swapAmount') as HTMLInputElement).value = '';
-                    }}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
-                      <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
-                      <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
-                      <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
-                    </svg>
-                    <span>Swap</span>
-                  </Button>
                 </div>
               </div>
             </div>
