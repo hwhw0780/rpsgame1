@@ -768,6 +768,10 @@ export default function Game() {
     }
   }, [])
 
+  // Add these states at the top with other states
+  const [showDepositForm, setShowDepositForm] = useState(false)
+  const [depositAmount, setDepositAmount] = useState('')
+
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
@@ -2579,6 +2583,85 @@ export default function Game() {
           </div>
         </div>
       </footer>
+
+      {showDepositForm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-slate-900 p-6 rounded-xl border border-purple-500/20 w-[400px] space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-purple-400">Deposit USDT</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDepositForm(false)}
+                className="text-gray-400 hover:text-gray-300"
+              >
+                ✕
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-white">USDT Address</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <Input
+                    value="0xE53F0c56b196724ec1615f7CbE3303690B9D7320"
+                    readOnly
+                    className="bg-slate-800/50 border-purple-500/20"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      navigator.clipboard.writeText("0xE53F0c56b196724ec1615f7CbE3303690B9D7320")
+                      toast({
+                        title: "Success",
+                        description: "Address copied to clipboard",
+                      })
+                    }}
+                    className="text-purple-400"
+                  >
+                    Copy
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-white">Deposit Amount</Label>
+                <Input
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder="Enter USDT amount"
+                  className="mt-1 bg-slate-800/50 border-purple-500/20"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={() => {
+                    toast({
+                      title: "Deposit Submitted",
+                      description: "Please contact customer service to confirm your deposit.",
+                    })
+                    setShowDepositForm(false)
+                  }}
+                >
+                  Submit
+                </Button>
+                <Button
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    window.open('https://t.me/yourtelegrambot', '_blank')
+                  }}
+                >
+                  Customer Service
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 } 
