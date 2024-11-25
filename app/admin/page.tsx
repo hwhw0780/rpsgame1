@@ -197,12 +197,13 @@ export default function AdminPage() {
                 <Button
                   variant="outline"
                   onClick={() => setShowCreateForm(false)}
+                  className="text-white"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleCreateUser}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 text-white"
                   disabled={!newUser.username || !newUser.password}
                 >
                   Create User
@@ -316,7 +317,7 @@ export default function AdminPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => handleUpdate(user.username, user)}
-                                className="bg-green-600/20 hover:bg-green-600/40 text-green-400"
+                                className="bg-green-600/20 hover:bg-green-600/40 text-white"
                               >
                                 Save
                               </Button>
@@ -324,7 +325,7 @@ export default function AdminPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => setEditingUser(null)}
-                                className="bg-red-600/20 hover:bg-red-600/40 text-red-400"
+                                className="bg-red-600/20 hover:bg-red-600/40 text-white"
                               >
                                 Cancel
                               </Button>
@@ -334,7 +335,7 @@ export default function AdminPage() {
                               variant="outline"
                               size="sm"
                               onClick={() => setEditingUser(user.username)}
-                              className="bg-blue-600/20 hover:bg-blue-600/40 text-blue-400"
+                              className="bg-blue-600/20 hover:bg-blue-600/40 text-white"
                             >
                               Edit
                             </Button>
