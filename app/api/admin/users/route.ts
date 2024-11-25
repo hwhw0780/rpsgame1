@@ -10,8 +10,8 @@ export async function GET() {
         rpsCoins: true,
         stakingRPS: true,
         usdtBalance: true,
-        erps: true,
-        withdrawableErps: true,
+        eRPS: true,
+        withdrawableERPS: true,
         referralCode: true,
         referralBonus: true
       }
