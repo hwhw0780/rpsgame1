@@ -375,7 +375,8 @@ export default function Game() {
           if (currentUser) {
             setState(prev => ({
               ...prev,
-              rpsCoins: currentUser.rpsCoins || 0
+              rpsCoins: currentUser.rpsCoins || 0,
+              usdtBalance: currentUser.usdtBalance || 0  // Make sure this is included
             }))
           }
         }
@@ -385,6 +386,10 @@ export default function Game() {
     }
 
     fetchUserData()
+    
+    // Set up polling to keep data in sync
+    const interval = setInterval(fetchUserData, 3000)  // Check every 3 seconds
+    return () => clearInterval(interval)
   }, [])
 
   // Update useEffect for currency rates
