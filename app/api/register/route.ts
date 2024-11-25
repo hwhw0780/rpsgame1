@@ -23,9 +23,10 @@ export async function POST(request: Request) {
     if (data.referralCode) {
       referrer = await prisma.user.findFirst({
         where: {
-          referralCode: {
-            equals: data.referralCode
-          }
+          AND: [
+            { referralCode: data.referralCode },
+            { referralCode: { not: null } }
+          ]
         }
       })
 
