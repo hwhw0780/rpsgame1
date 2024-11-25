@@ -337,7 +337,7 @@ export default function AdminPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => {
+                                onClick={async () => {
                                   if (user.username === 'admin') {
                                     toast({
                                       title: "Error",
@@ -347,7 +347,34 @@ export default function AdminPage() {
                                     return
                                   }
                                   if (window.confirm('Are you sure you want to delete this user?')) {
-                                    handleDelete(user.username)
+                                    try {
+                                      const response = await fetch('/api/admin/users', {
+                                        method: 'DELETE',
+                                        headers: {
+                                          'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ username: user.username })
+                                      })
+
+                                      if (!response.ok) {
+                                        const error = await response.json()
+                                        throw new Error(error.error || 'Failed to delete user')
+                                      }
+
+                                      toast({
+                                        title: "Success",
+                                        description: "User deleted successfully"
+                                      })
+
+                                      // Refresh the users list
+                                      fetchUsers()
+                                    } catch (error) {
+                                      toast({
+                                        title: "Error",
+                                        description: error instanceof Error ? error.message : "Failed to delete user",
+                                        variant: "destructive"
+                                      })
+                                    }
                                   }
                                 }}
                                 className="bg-red-600/20 hover:bg-red-600/40 text-red-400"
