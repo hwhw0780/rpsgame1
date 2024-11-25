@@ -28,8 +28,8 @@ export async function POST(request: Request) {
         rpsCoins: 40000,
         stakingRPS: 10000,
         usdtBalance: 0,
-        erps: 0,
-        withdrawableErps: 0
+        eRPS: 0,
+        withdrawableERPS: 0
       }
     })
 

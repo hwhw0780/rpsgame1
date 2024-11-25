@@ -19,8 +19,8 @@ async function main() {
         rpsCoins: 0,
         stakingRPS: 0,
         usdtBalance: 0,
-        erps: 0,
-        withdrawableErps: 0,
+        eRPS: 0,
+        withdrawableERPS: 0,
         lastLogin: new Date()
       },
     })
@@ -38,8 +38,8 @@ async function main() {
         rpsCoins: 40000,
         stakingRPS: 10000,
         usdtBalance: 0,
-        erps: 0,
-        withdrawableErps: 0,
+        eRPS: 0,
+        withdrawableERPS: 0,
         lastLogin: new Date()
       },
     })
