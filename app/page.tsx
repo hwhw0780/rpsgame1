@@ -355,6 +355,40 @@ export default function Game() {
     choiceTimeLeft: null
   })
 
+  // Add this near the top of your component
+  const [userData, setUserData] = useState<any>(null)
+
+  // Add this useEffect to fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Get user from localStorage
+        const storedUser = localStorage.getItem('user')
+        if (!storedUser) return
+
+        const { username } = JSON.parse(storedUser)
+
+        // Fetch latest user data
+        const response = await fetch(`/api/users/${username}`)
+        const data = await response.json()
+
+        if (response.ok) {
+          // Update localStorage with latest data
+          localStorage.setItem('user', JSON.stringify(data.user))
+          // Update state with latest RPS balance
+          setState(prev => ({
+            ...prev,
+            rpsCoins: data.user.rpsCoins || 0
+          }))
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+      }
+    }
+
+    fetchUserData()
+  }, []) // Run once when component mounts
+
   // Update useEffect for currency rates
   useEffect(() => {
     const updateRates = async () => {
