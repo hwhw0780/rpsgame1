@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { type NextApiRequest } from 'next'
+import { NextRequest } from 'next/server'
 
 export async function GET(
-  req: NextApiRequest,
+  request: NextRequest,
   { params }: { params: { username: string } }
 ) {
   try {
