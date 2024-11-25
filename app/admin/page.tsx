@@ -32,10 +32,14 @@ export default function AdminPage() {
   const [username, setUsername] = useState<string>('')
 
   useEffect(() => {
-    const user = localStorage.getItem('user')
-    if (user) {
-      const userData = JSON.parse(user)
-      setUsername(userData.username)
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser)
+        setUsername(userData.username)
+      } catch (error) {
+        console.error('Error parsing user data:', error)
+      }
     }
     fetchUsers()
   }, [])
@@ -138,7 +142,11 @@ export default function AdminPage() {
         <div className="flex items-center justify-between p-6 border-b border-gray-800">
           <div>
             <CardTitle className="text-2xl font-bold">Admin Dashboard</CardTitle>
-            <p className="text-gray-400 mt-1">Welcome back, <span className="text-purple-400">{username}</span></p>
+            {username && (
+              <p className="text-gray-400 mt-1">
+                Welcome back, <span className="text-purple-400 font-semibold">{username}</span>
+              </p>
+            )}
           </div>
           <Button 
             onClick={() => setShowCreateForm(true)}
