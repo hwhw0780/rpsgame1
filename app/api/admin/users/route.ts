@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { NextRequest } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -24,7 +23,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(request: Request) {
   try {
     const data = await request.json()
     const { username, ...updates } = data

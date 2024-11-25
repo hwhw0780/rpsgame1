@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-type Props = {
-  params: { username: string }
-}
-
 export async function DELETE(
   request: Request,
-  props: Props
+  { params }: { params: Record<string, string> }
 ) {
   try {
-    const { username } = props.params
+    const username = params.username
 
     if (username === 'admin') {
       return NextResponse.json(
