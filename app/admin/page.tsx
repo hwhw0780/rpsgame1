@@ -84,7 +84,7 @@ export default function AdminPage() {
     } catch (error) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error instanceof Error ? error.message : 'Failed to create user',
         variant: "destructive"
       })
     }
