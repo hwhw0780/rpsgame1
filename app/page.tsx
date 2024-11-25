@@ -763,242 +763,83 @@ export default function Game() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Balance Rows */}
-            <div className="space-y-4">
-              {/* RPS Balance Row */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>RPS Balance</Label>
-                  <div className="text-2xl font-bold text-blue-400">
-                    {state.rpsCoins.toLocaleString()} RPS
-                  </div>
-                  <div className="text-sm text-gray-400">
-                    ≈ ${(state.rpsCoins * 0.000219).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
+            {/* Balance Containers */}
+            <div className="space-y-3">
+              {/* Top Row: eRPS and Withdrawable eRPS */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* eRPS Balance Container */}
+                <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-500/20">
+                  <div className="text-center">
+                    <Label className="text-sm text-purple-200">eRPS Balance</Label>
+                    <div className="text-lg font-bold text-purple-400 mt-1">
+                      {state.eRPS.toLocaleString()}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="mt-2 w-full text-xs bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
+                      onClick={() => setState(prev => ({
+                        ...prev,
+                        swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: true }
+                      }))}
+                    >
+                      Convert to RPS
+                    </Button>
                   </div>
                 </div>
-                {state.swapDialogOpen.rpsToUsdt ? (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        value={state.swapAmount}
-                        onChange={(e) => setState(prev => ({ ...prev, swapAmount: e.target.value }))}
-                        placeholder="Amount of RPS"
-                        className="w-32 bg-blue-900/20 border-blue-500/20 text-white"
-                      />
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="bg-blue-900/20 border-blue-500/20 hover:bg-blue-900/40 text-blue-400"
-                        onClick={() => {
-                          const amount = Number(state.swapAmount)
-                          if (amount <= 0 || amount > state.rpsCoins) {
-                            toast({
-                              title: "Invalid Amount",
-                              description: "Please enter a valid amount within your balance.",
-                              variant: "destructive"
-                            })
-                            return
-                          }
 
-                          const usdtAmount = amount * 0.000219  // Updated rate
-
-                          setState(prev => ({
-                            ...prev,
-                            rpsCoins: prev.rpsCoins - amount,
-                            usdtBalance: prev.usdtBalance + usdtAmount,
-                            swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false },
-                            swapAmount: ''
-                          }))
-
-                          toast({
-                            title: "Swap Successful",
-                            description: `Swapped ${amount.toLocaleString()} RPS to ${usdtAmount.toFixed(2)} USDT`,
-                          })
-                        }}
-                      >
-                        Confirm
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-400"
-                        onClick={() => setState(prev => ({
-                          ...prev,
-                          swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false },
-                          swapAmount: ''
-                        }))}
-                      >
-                        Cancel
-                      </Button>
+                {/* Withdrawable eRPS Container */}
+                <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-xl p-3 backdrop-blur-sm border border-green-500/20">
+                  <div className="text-center">
+                    <Label className="text-sm text-green-200">Withdrawable eRPS</Label>
+                    <div className="text-lg font-bold text-green-400 mt-1">
+                      {state.withdrawableERPS.toLocaleString()}
                     </div>
-                    <div className="text-xs text-gray-400 text-right space-y-1">
-                      <div>Rate: 1 RPS = $0.000219 USDT</div>
-                      {state.swapAmount && Number(state.swapAmount) > 0 && (
-                        <div className="text-blue-400">
-                          You will receive: {(Number(state.swapAmount) * 0.000219).toFixed(2)} USDT
-                        </div>
-                      )}
-                    </div>
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      className="mt-2 w-full text-xs bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
+                      onClick={() => setState(prev => ({
+                        ...prev,
+                        swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: true }
+                      }))}
+                    >
+                      Withdraw
+                    </Button>
                   </div>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="bg-blue-900/20 border-blue-500/20 hover:bg-blue-900/40 text-blue-400"
-                    onClick={() => setState(prev => ({
-                      ...prev,
-                      swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: true }
-                    }))}
-                  >
-                    Swap to USDT
-                  </Button>
-                )}
-              </div>
-
-              {/* Staked RPS Row */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>Staked RPS</Label>
-                  <div className="text-2xl font-bold text-purple-400">
-                    {state.stakingRPS.toLocaleString()} RPS
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <span>APR: ~{calculateCurrentAPR()}%</span>
-                      <div className="group relative inline-block cursor-help">
-                        <div className="w-4 h-4 rounded-full bg-purple-900/40 border border-purple-400/30 flex items-center justify-center text-xs text-purple-300 hover:bg-purple-900/60">
-                          ?
-                        </div>
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 p-2 bg-purple-900/90 text-purple-100 text-xs rounded-lg shadow-lg backdrop-blur-sm border border-purple-500/20 z-50">
-                          <p>APR is not fixed and may vary based on market conditions and staking duration.</p>
-                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-purple-900/90 border-r border-b border-purple-500/20"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      {getRemainingStakingDays()} days remaining
-                    </div>
-                  </div>
-                  <div className="text-sm text-green-400 mt-1">
-                    Estimated daily eRPS rewards: {calculateDailyRewards().toFixed(2)}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
-                    onClick={() => setState(prev => ({ ...prev, stakingDialogOpen: true }))}
-                  >
-                    Staking
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="bg-red-900/20 border-red-500/20 hover:bg-red-900/40 text-red-400"
-                    onClick={() => {
-                      if (state.stakedAmounts.length === 0) {
-                        toast({
-                          title: "No Staked Amount",
-                          description: "You don't have any staked RPS to unstake.",
-                          variant: "destructive"
-                        });
-                        return;
-                      }
-                      setState(prev => ({ ...prev, unstakeDialogOpen: true }));
-                    }}
-                  >
-                    Unstake
-                  </Button>
                 </div>
               </div>
 
-              {/* USDT Balance Row */}
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label>USDT Balance</Label>
-                  <div className="text-2xl font-bold text-green-400">
-                    ${state.usdtBalance.toLocaleString()}
+              {/* Bottom Row: Quick Cash Out */}
+              <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-300/20">
+                <div className="text-center">
+                  <Label className="text-sm text-purple-200">Quick Cash Out</Label>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Convert eRPS (60%)
                   </div>
-                </div>
-                {state.swapDialogOpen.usdtToRps ? (
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2">
+                  <div className="mt-2">
+                    <div className="relative max-w-[200px] mx-auto">
                       <Input
                         type="number"
-                        value={state.swapAmount}
-                        onChange={(e) => setState(prev => ({ ...prev, swapAmount: e.target.value }))}
-                        placeholder="Amount of USDT"
-                        className="w-32 bg-green-900/20 border-green-500/20 text-white"
+                        placeholder={`Max: ${state.eRPS}`}
+                        className="h-7 px-2 text-xs bg-purple-900/20 border-purple-500/30 text-white pr-12"
+                        max={state.eRPS}
+                        id="swapAmount"
                       />
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
-                        onClick={() => {
-                          const amount = Number(state.swapAmount)
-                          if (amount <= 0 || amount > state.usdtBalance) {
-                            toast({
-                              title: "Invalid Amount",
-                              description: "Please enter a valid amount within your balance.",
-                              variant: "destructive"
-                            })
-                            return
-                          }
-
-                          const rpsAmount = amount / 0.000219  // Updated rate
-
-                          setState(prev => ({
-                            ...prev,
-                            usdtBalance: prev.usdtBalance - amount,
-                            rpsCoins: prev.rpsCoins + rpsAmount,
-                            swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: false },
-                            swapAmount: ''
-                          }))
-
-                          toast({
-                            title: "Swap Successful",
-                            description: `Swapped ${amount} USDT to ${rpsAmount.toLocaleString()} RPS`,
-                          })
-                        }}
-                      >
-                        Confirm
-                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-gray-400"
-                        onClick={() => setState(prev => ({
-                          ...prev,
-                          swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: false },
-                          swapAmount: ''
-                        }))}
+                        className="absolute right-0 top-0 h-7 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200"
+                        onClick={() => {
+                          const input = document.getElementById('swapAmount') as HTMLInputElement;
+                          input.value = state.eRPS.toString();
+                        }}
                       >
-                        Cancel
+                        Max
                       </Button>
                     </div>
-                    <div className="text-xs text-gray-400 text-right space-y-1">
-                      <div>Rate: 1 USDT = {(1 / 0.000219).toLocaleString()} RPS</div>
-                      {state.swapAmount && Number(state.swapAmount) > 0 && (
-                        <div className="text-green-400">
-                          You will receive: {(Number(state.swapAmount) / 0.000219).toLocaleString()} RPS
-                        </div>
-                      )}
-                    </div>
                   </div>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
-                    onClick={() => setState(prev => ({
-                      ...prev,
-                      swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: true }
-                    }))}
-                  >
-                    Swap to RPS
-                  </Button>
-                )}
+                </div>
               </div>
             </div>
 
