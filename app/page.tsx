@@ -1093,61 +1093,236 @@ export default function Game() {
               RPS Game Arena
             </CardTitle>
             <div className="grid grid-cols-3 gap-4 mt-4">
-              {/* Balance Containers in RPS Arena */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* eRPS Box */}
-                <div className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 rounded-xl p-3 backdrop-blur-sm border border-purple-500/20">
-                  <div className="text-center">
-                    <Label className="text-sm text-purple-200">eRPS Balance</Label>
-                    <div className="text-lg font-bold text-purple-400 mt-1">
-                      {state.eRPS.toLocaleString()}
+              <div className="relative text-center p-4 bg-gradient-to-br from-indigo-600/20 to-blue-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-indigo-300/20">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-2 right-2 h-8 w-8 p-0 text-lg font-bold bg-indigo-900/40 hover:bg-indigo-900/60 text-indigo-300 hover:text-indigo-100 rounded-lg border border-indigo-400/30 flex items-center justify-center"
+                  onClick={() => {
+                    const maxDeposit = Math.floor(state.rpsCoins * 0.05);
+                    const depositAmount = window.prompt(
+                      `Enter amount to deposit:\n\nMaximum deposit: ${maxDeposit.toLocaleString()} RPS (5% of your RPS balance)\nYour RPS Balance: ${state.rpsCoins.toLocaleString()} RPS`
+                    );
+                    
+                    if (depositAmount === null) return;
+                    
+                    const amount = Number(depositAmount);
+                    if (isNaN(amount) || amount <= 0) {
+                      toast({
+                        title: "Invalid Amount",
+                        description: "Please enter a valid number greater than 0",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    
+                    if (amount > maxDeposit) {
+                      toast({
+                        title: "Exceeds Limit",
+                        description: `Maximum deposit is ${maxDeposit.toLocaleString()} RPS (5% of your RPS balance)`,
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    
+                    if (amount > state.rpsCoins) {
+                      toast({
+                        title: "Insufficient Balance",
+                        description: "You don't have enough RPS to deposit this amount",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+
+                    setState(prev => ({
+                      ...prev,
+                      rpsCoins: prev.rpsCoins - amount,
+                      eRPS: prev.eRPS + amount
+                    }));
+
+                    toast({
+                      title: "Deposit Successful",
+                      description: `Deposited ${amount.toLocaleString()} RPS to eRPS`,
+                    });
+                  }}
+                >
+                  +
+                </Button>
+
+                <div className="flex flex-col items-center justify-center mt-2">
+                  <div className="flex items-center gap-1">
+                    <Label className="text-indigo-200 font-semibold">eRPS</Label>
+                    <div className="group relative inline-block cursor-help">
+                      <div className="w-4 h-4 rounded-full bg-indigo-900/40 border border-indigo-400/30 flex items-center justify-center text-xs text-indigo-300 hover:bg-indigo-900/60">
+                        ?
+                      </div>
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-48 p-2 bg-indigo-900/90 text-indigo-100 text-xs rounded-lg shadow-lg backdrop-blur-sm border border-indigo-500/20 z-50">
+                        <p>Stake your RPS tokens to earn eRPS. Higher stakes and longer durations earn more rewards!</p>
+                        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 rotate-45 w-2 h-2 bg-indigo-900/90 border-r border-b border-indigo-500/20"></div>
+                      </div>
                     </div>
-                    <div className="space-y-2 mt-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="w-full text-xs bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
-                        onClick={() => setState(prev => ({
-                          ...prev,
-                          swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: true }
-                        }))}
-                      >
-                        +
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="w-full text-xs bg-purple-900/20 border-purple-500/20 hover:bg-purple-900/40 text-purple-400"
-                        onClick={() => setState(prev => ({
-                          ...prev,
-                          swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: true }
-                        }))}
-                      >
-                        -
-                      </Button>
-                    </div>
+                  </div>
+                  <div className="text-xl font-bold text-indigo-300 mt-2">
+                    {state.eRPS.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-400">
+                    ≈ ${(state.eRPS * 0.000219).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                    })}
                   </div>
                 </div>
-
-                {/* Withdrawable eRPS Box */}
-                <div className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 rounded-xl p-3 backdrop-blur-sm border border-green-500/20">
-                  <div className="text-center">
-                    <Label className="text-sm text-green-200">Withdrawable eRPS</Label>
-                    <div className="text-lg font-bold text-green-400 mt-1">
-                      {state.withdrawableERPS.toLocaleString()}
+              </div>
+              
+              {/* Withdrawable eRPS Box */}
+              <div className="text-center p-4 bg-gradient-to-br from-emerald-600/20 to-green-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-emerald-300/20">
+                <div className="flex items-center justify-center">
+                  <Label className="text-emerald-200 font-semibold">Withdrawable eRPS</Label>
+                </div>
+                <div className="text-xl font-bold text-emerald-300 mt-1">
+                  {state.withdrawableERPS.toLocaleString()} points
+                </div>
+                {state.withdrawableERPS > 0 && (
+                  <div className="flex flex-col gap-2 mt-2">
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        placeholder={`Max: ${state.withdrawableERPS}`}
+                        className="h-6 px-2 text-xs bg-emerald-900/20 border-emerald-500/30 text-white pr-16"
+                        max={state.withdrawableERPS}
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          if (value > state.withdrawableERPS) {
+                            e.target.value = state.withdrawableERPS.toString();
+                          }
+                        }}
+                        id="withdrawAmount"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-0 top-0 h-6 px-2 text-xs bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-200 rounded-l-none"
+                        onClick={() => {
+                          const input = document.getElementById('withdrawAmount') as HTMLInputElement;
+                          input.value = state.withdrawableERPS.toString();
+                        }}
+                      >
+                        Max
+                      </Button>
                     </div>
                     <Button 
-                      variant="outline"
+                      variant="ghost" 
                       size="sm"
-                      className="mt-2 w-full text-xs bg-green-900/20 border-green-500/20 hover:bg-green-900/40 text-green-400"
-                      onClick={() => setState(prev => ({
-                        ...prev,
-                        swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: true }
-                      }))}
+                      className="h-6 px-2 text-xs bg-emerald-900/40 hover:bg-emerald-900/60 text-emerald-200 flex items-center gap-1 rounded-md border border-emerald-500/30"
+                      onClick={() => {
+                        const amount = Number((document.getElementById('withdrawAmount') as HTMLInputElement).value);
+                        if (amount <= 0 || amount > state.withdrawableERPS) {
+                          toast({
+                            title: "Invalid Amount",
+                            description: "Please enter a valid amount to withdraw.",
+                            variant: "destructive"
+                          });
+                          return;
+                        }
+
+                        setState(prev => ({
+                          ...prev,
+                          rpsCoins: prev.rpsCoins + amount,
+                          withdrawableERPS: prev.withdrawableERPS - amount
+                        }));
+
+                        toast({
+                          title: "Withdrawal Successful",
+                          description: `${amount.toLocaleString()} eRPS has been added to your RPS balance.`,
+                        });
+
+                        (document.getElementById('withdrawAmount') as HTMLInputElement).value = '';
+                      }}
                     >
-                      Withdraw
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 5v14"/>
+                        <path d="M19 12l-7 7-7-7"/>
+                      </svg>
+                      <span>Withdraw</span>
                     </Button>
                   </div>
+                )}
+              </div>
+              
+              {/* Replace the Buy Skin box with eRPS Swap box */}
+              <div className="text-center p-4 bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl backdrop-blur-sm shadow-lg border border-purple-300/20">
+                <Label className="text-purple-200 font-semibold">Quick Cash Out</Label>
+                <div className="text-sm text-gray-400 mt-1 mb-2">
+                  Convert eRPS to Withdrawable eRPS
+                  <br />
+                  (Receive 60%)
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      placeholder={`Max: ${state.eRPS}`}
+                      className="h-6 px-2 text-xs bg-purple-900/20 border-purple-500/30 text-white pr-16"
+                      max={state.eRPS}
+                      onChange={(e) => {
+                        const value = Number(e.target.value);
+                        if (value > state.eRPS) {
+                          e.target.value = state.eRPS.toString();
+                        }
+                      }}
+                      id="swapAmount"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-6 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200 rounded-l-none"
+                      onClick={() => {
+                        const input = document.getElementById('swapAmount') as HTMLInputElement;
+                        input.value = state.eRPS.toString();
+                      }}
+                    >
+                      Max
+                    </Button>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="h-6 px-2 text-xs bg-purple-900/40 hover:bg-purple-900/60 text-purple-200 flex items-center gap-1 rounded-md border border-purple-500/30"
+                    onClick={() => {
+                      const amount = Number((document.getElementById('swapAmount') as HTMLInputElement).value);
+                      if (amount <= 0 || amount > state.eRPS) {
+                        toast({
+                          title: "Invalid Amount",
+                          description: "Please enter a valid amount to swap.",
+                          variant: "destructive"
+                        });
+                        return;
+                      }
+
+                      const withdrawableAmount = Math.floor(amount * 0.6); // 60% conversion rate
+
+                      setState(prev => ({
+                        ...prev,
+                        eRPS: prev.eRPS - amount,
+                        withdrawableERPS: prev.withdrawableERPS + withdrawableAmount
+                      }));
+
+                      toast({
+                        title: "Swap Successful",
+                        description: `Swapped ${amount.toLocaleString()} eRPS to ${withdrawableAmount.toLocaleString()} Withdrawable eRPS`,
+                      });
+
+                      (document.getElementById('swapAmount') as HTMLInputElement).value = '';
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M8 3v3a2 2 0 0 1-2 2H3"/>
+                      <path d="M21 8h-3a2 2 0 0 1-2-2V3"/>
+                      <path d="M3 16h3a2 2 0 0 1 2 2v3"/>
+                      <path d="M16 21v-3a2 2 0 0 1 2-2h3"/>
+                    </svg>
+                    <span>Swap</span>
+                  </Button>
                 </div>
               </div>
             </div>
