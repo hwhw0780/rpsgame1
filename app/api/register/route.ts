@@ -18,45 +18,29 @@ export async function POST(request: Request) {
       )
     }
 
-    // Validate referral code if provided
-    let referrer = null
-    if (data.referralCode) {
-      referrer = await prisma.user.findFirst({
-        where: {
-          username: data.username,
-          OR: [
-            { role: 'user' },
-            { role: 'admin' }
-          ]
-        }
-      })
-
-      if (!referrer) {
-        return NextResponse.json(
-          { error: 'Invalid referral code' },
-          { status: 400 }
-        )
-      }
-    }
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(data.password, 10)
 
     // Create new user
-    const hashedPassword = await bcrypt.hash(data.password, 10)
     const user = await prisma.user.create({
       data: {
         username: data.username,
         password: hashedPassword,
         role: 'user',
-        rpsCoins: 40000,
-        stakingRPS: 10000,
-        usdtBalance: 0,
-        eRPS: 0,
-        withdrawableERPS: 0
+        rpsCoins: data.rpsCoins || 40000,
+        stakingRPS: data.stakingRPS || 10000,
+        usdtBalance: data.usdtBalance || 0,
+        eRPS: data.eRPS || 0,
+        withdrawableERPS: data.withdrawableERPS || 0,
+        lastLogin: new Date()
       }
     })
 
+    // Remove password from response
     const { password: _, ...userData } = user
     return NextResponse.json({ user: userData })
   } catch (error) {
+    console.error('Registration error:', error)
     return NextResponse.json(
       { error: 'Failed to register user' },
       { status: 500 }
