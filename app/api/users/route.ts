@@ -9,11 +9,10 @@ export async function GET() {
         rpsCoins: true,
         stakingRPS: true,
         usdtBalance: true,
-        erps: true,
-        withdrawableErps: true,
-        referralCode: true,
-        referredBy: true,
-        referralBonus: true
+        eRPS: true,
+        withdrawableERPS: true,
+        lastLogin: true,
+        createdAt: true
       }
     })
     return NextResponse.json({ users })
