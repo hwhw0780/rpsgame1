@@ -1140,9 +1140,12 @@ export default function Game() {
                 Withdraw USDT
               </Button>
               <Button 
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                onClick={() => {
+                  window.open('https://t.me/yourtelegrambot', '_blank')
+                }}
               >
-                Staking
+                Have question? Contact us!
               </Button>
             </div>
 
