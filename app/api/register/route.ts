@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     // Validate referral code if provided
     if (data.referralCode) {
-      const referrer = await prisma.user.findFirst({
+      const referrer = await prisma.user.findUnique({
         where: { referralCode: data.referralCode }
       })
 
@@ -48,7 +48,8 @@ export async function POST(request: Request) {
         eRPS: 0,
         withdrawableERPS: 0,
         referralCode: newReferralCode,
-        referredBy: data.referralCode || null
+        referredBy: data.referralCode || null,
+        referralBonus: 0
       }
     })
 
