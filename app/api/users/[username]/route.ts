@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-
-export const dynamic = 'force-dynamic'
+import { type NextApiRequest } from 'next'
 
 export async function GET(
-  _request: Request,
-  { params }: { params: Record<string, string> }
+  req: NextApiRequest,
+  { params }: { params: { username: string } }
 ) {
   try {
     const user = await prisma.user.findUnique({
