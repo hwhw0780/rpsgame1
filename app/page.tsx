@@ -114,6 +114,7 @@ interface GameState {
   estimatedQueueTime: number | null
   opponentFound: boolean
   choiceTimeLeft: number | null
+  dailyRewards: number;
 }
 
 const generateGameNo = () => {
@@ -352,7 +353,8 @@ export default function Game() {
     unstakeDialogOpen: false,
     estimatedQueueTime: null,
     opponentFound: false,
-    choiceTimeLeft: null
+    choiceTimeLeft: null,
+    dailyRewards: 0
   })
 
   // Add this near the top of your component
@@ -682,14 +684,14 @@ export default function Game() {
     const remainingDays = state.stakedAmounts.map(stake => {
       const endDate = new Date(stake.startDate);
       endDate.setDate(endDate.getDate() + stake.duration);
-      return Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      return Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     });
     
     return Math.max(...remainingDays);
   };
 
-  // Add helper function for daily rewards calculation
-  const calculateDailyRewards = async () => {
+  // Make this a regular function that returns number
+  const calculateDailyRewards = () => {
     if (state.stakedAmounts.length === 0) return 0;
     
     const dailyRewards = state.stakedAmounts.reduce((sum, stake) => {
@@ -698,33 +700,8 @@ export default function Game() {
       return sum + dailyReward;
     }, 0);
 
-    try {
-      const storedUser = localStorage.getItem('user')
-      if (!storedUser) return 0
-      const { username } = JSON.parse(storedUser)
-
-      // Update daily rewards in database
-      const response = await fetch('/api/users/balance', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username,
-          dailyRewards
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to update daily rewards')
-      }
-
-      return dailyRewards
-    } catch (error) {
-      console.error('Error updating daily rewards:', error)
-      return dailyRewards
-    }
-  }
+    return dailyRewards;
+  };
 
   const calculateUnstakeReturn = () => {
     if (state.stakedAmounts.length === 0) return 0;
@@ -1174,6 +1151,43 @@ export default function Game() {
     }
   }
 
+  // Add this useEffect to update daily rewards
+  useEffect(() => {
+    const updateDailyRewards = async () => {
+      const rewards = calculateDailyRewards();
+      
+      try {
+        const storedUser = localStorage.getItem('user')
+        if (!storedUser) return
+        const { username } = JSON.parse(storedUser)
+
+        const response = await fetch('/api/users/balance', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            username,
+            dailyRewards: rewards
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update daily rewards')
+        }
+
+        setState(prev => ({
+          ...prev,
+          dailyRewards: rewards
+        }))
+      } catch (error) {
+        console.error('Error updating daily rewards:', error)
+      }
+    }
+
+    updateDailyRewards()
+  }, [state.stakedAmounts]) // Run when staked amounts change
+
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
@@ -1335,7 +1349,7 @@ export default function Game() {
                     </div>
                   </div>
                   <div className="text-sm text-green-400 mt-1">
-                    Estimated daily eRPS rewards: {calculateDailyRewards().toFixed(2)}
+                    Estimated daily eRPS rewards: {state.dailyRewards.toFixed(2)}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1801,7 +1815,7 @@ export default function Game() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="text-yellow-400 font-bold">+{calculateDailyRewards().toFixed(2)} eRPS</div>
+                        <div className="text-yellow-400 font-bold">+{state.dailyRewards.toFixed(2)} eRPS</div>
                         {state.questStatus.daily_rewards === 'completed' && !canClaimDaily() && (
                           <div className="text-gray-400 text-xs font-mono">
                             {getTimeUntilNextClaim()}
@@ -1814,32 +1828,29 @@ export default function Game() {
                             size="sm"
                             className="h-7 px-2 text-xs bg-green-900/40 hover:bg-green-900/60 text-green-200"
                             onClick={() => {
-                              if (calculateDailyRewards() <= 0) {
+                              if (state.dailyRewards <= 0) {
                                 toast({
                                   title: "No Rewards Available",
                                   description: "You need to stake RPS to earn daily rewards.",
                                   variant: "destructive"
-                                });
-                                return;
+                                })
+                                return
                               }
 
-                              const rewards = calculateDailyRewards();
-                              const now = new Date();
-                              
                               setState(prev => ({
                                 ...prev,
-                                eRPS: prev.eRPS + rewards,
+                                eRPS: prev.eRPS + state.dailyRewards,
                                 questStatus: {
                                   ...prev.questStatus,
                                   daily_rewards: 'completed',
-                                  lastDailyRewardsClaim: now.toISOString() // Store current time
+                                  lastDailyRewardsClaim: new Date().toISOString()
                                 }
-                              }));
+                              }))
 
                               toast({
                                 title: "Daily Rewards Claimed!",
-                                description: `${rewards.toFixed(2)} eRPS has been added to your balance.`,
-                              });
+                                description: `${state.dailyRewards.toFixed(2)} eRPS has been added to your balance.`,
+                              })
                             }}
                           >
                             Claim
