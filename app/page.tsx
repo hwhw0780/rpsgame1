@@ -1188,6 +1188,30 @@ export default function Game() {
     updateDailyRewards()
   }, [state.stakedAmounts]) // Run when staked amounts change
 
+  // Add this state
+  const [transactions, setTransactions] = useState<any[]>([])
+
+  // Add this useEffect to fetch transactions
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const storedUser = localStorage.getItem('user')
+        if (!storedUser) return
+        const { username } = JSON.parse(storedUser)
+
+        const response = await fetch(`/api/users/${username}/transactions`)
+        if (!response.ok) throw new Error('Failed to fetch transactions')
+
+        const data = await response.json()
+        setTransactions(data.transactions)
+      } catch (error) {
+        console.error('Error fetching transactions:', error)
+      }
+    }
+
+    fetchTransactions()
+  }, [])
+
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
@@ -1579,6 +1603,59 @@ export default function Game() {
                        currency === 'CAD' ? 'C$' :
                        currency === 'AUD' ? 'A$' :
                        'RM'} {data.rate.toFixed(2)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Transaction History */}
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-purple-400 mb-4">Transaction History</h3>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {transactions.map((tx) => (
+                  <div 
+                    key={tx.id}
+                    className="p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:bg-slate-800/70 transition-all"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-semibold text-gray-200">
+                          {tx.type.split('_').map((word: string) => 
+                            word.charAt(0) + word.slice(1).toLowerCase()
+                          ).join(' ')}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          {new Date(tx.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`font-semibold ${
+                          tx.type.includes('WITHDRAW') || tx.type.includes('UNSTAKE') 
+                            ? 'text-red-400' 
+                            : 'text-green-400'
+                        }`}>
+                          {tx.type.includes('WITHDRAW') || tx.type.includes('UNSTAKE') ? '-' : '+'}
+                          {tx.amount.toLocaleString()} {tx.toBalance}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          From: {tx.fromBalance}
+                        </div>
+                      </div>
+                    </div>
+                    {tx.details && (
+                      <div className="mt-2 text-sm text-gray-400">
+                        {tx.details}
+                      </div>
+                    )}
+                    <div className="mt-2 text-xs">
+                      <span className={`px-2 py-1 rounded-full ${
+                        tx.status === 'completed' ? 'bg-green-900/40 text-green-400' :
+                        tx.status === 'pending' ? 'bg-yellow-900/40 text-yellow-400' :
+                        'bg-red-900/40 text-red-400'
+                      }`}>
+                        {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
+                      </span>
                     </div>
                   </div>
                 ))}

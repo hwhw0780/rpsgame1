@@ -41,8 +41,12 @@ model Transaction {
   id          String   @id @default(cuid())
   userId      String
   user        User     @relation(fields: [userId], references: [id])
-  type        String
-  amount      Int
+  type        String   // 'RPS_TO_USDT', 'USDT_TO_RPS', 'STAKE', 'UNSTAKE', 'WITHDRAW_ERPS', etc.
+  amount      Float    // Amount involved in transaction
+  fromBalance String   // 'RPS', 'USDT', 'eRPS', 'stakingRPS', etc.
+  toBalance   String   // Where the amount went to
+  status      String   // 'completed', 'pending', 'failed'
+  details     String?  // Additional details like APR for staking, penalty for unstaking
   createdAt   DateTime @default(now())
 
   @@index([userId])
