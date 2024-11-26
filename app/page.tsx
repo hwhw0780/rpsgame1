@@ -870,8 +870,10 @@ export default function Game() {
 
   // Add this function to handle staking
   const handleStake = async (amount: number, stakingPackage: any) => {
+    if (isStaking) return  // Prevent multiple clicks
+    
     try {
-      setIsUpdatingBalance(true)
+      setIsStaking(true)  // Disable button
       const storedUser = localStorage.getItem('user')
       if (!storedUser) return
       const { username } = JSON.parse(storedUser)
@@ -903,7 +905,6 @@ export default function Game() {
 
       const data = await response.json()
 
-      // Update state with both new balances
       setState(prev => ({
         ...prev,
         rpsCoins: data.user.rpsCoins,
@@ -915,7 +916,7 @@ export default function Game() {
       }))
 
       toast({
-        title: "Staking Successful",
+        title: "Success",
         description: `${amount.toLocaleString()} RPS has been staked for ${stakingPackage.days} days at ${stakingPackage.apr}% APR`,
       })
     } catch (error) {
@@ -925,12 +926,14 @@ export default function Game() {
         variant: "destructive"
       })
     } finally {
-      setIsUpdatingBalance(false)
+      setIsStaking(false)  // Re-enable button
     }
   }
 
   // Add this state
   const [isSwapping, setIsSwapping] = useState(false)
+  const [isSwappingToRPS, setIsSwappingToRPS] = useState(false)
+  const [isStaking, setIsStaking] = useState(false)
 
   // Update the RPS to USDT swap handler
   const handleRPStoUSDTSwap = async () => {
@@ -994,6 +997,71 @@ export default function Game() {
       })
     } finally {
       setIsSwapping(false)  // Re-enable button
+    }
+  }
+
+  // Update the USDT to RPS swap handler
+  const handleUSDTtoRPSSwap = async () => {
+    if (isSwappingToRPS) return  // Prevent multiple clicks
+    
+    const amount = Number(state.swapAmount)
+    if (amount <= 0 || amount > state.usdtBalance) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount within your USDT balance",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      setIsSwappingToRPS(true)  // Disable button
+      const storedUser = localStorage.getItem('user')
+      if (!storedUser) return
+      const { username } = JSON.parse(storedUser)
+
+      const rpsAmount = amount / 0.000219  // USDT to RPS rate
+      const newUSDTBalance = state.usdtBalance - amount
+      const newRPSBalance = state.rpsCoins + rpsAmount
+
+      const response = await fetch('/api/users/balance', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          usdtBalance: newUSDTBalance,
+          rpsCoins: newRPSBalance
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update balance')
+      }
+
+      const data = await response.json()
+
+      setState(prev => ({
+        ...prev,
+        usdtBalance: data.user.usdtBalance,
+        rpsCoins: data.user.rpsCoins,
+        swapAmount: '',
+        swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: false }
+      }))
+
+      toast({
+        title: "Success",
+        description: `Swapped ${amount.toFixed(2)} USDT to ${rpsAmount.toLocaleString()} RPS`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to swap USDT to RPS",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSwappingToRPS(false)  // Re-enable button
     }
   }
 
@@ -2547,8 +2615,10 @@ export default function Game() {
               </div>
 
               <Button
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
-                disabled={!state.selectedStakingPackage || !state.stakingAmount || Number(state.stakingAmount) <= 0}
+                className={`w-full bg-gradient-to-r from-purple-600 to-blue-600 ${
+                  isStaking ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={!state.selectedStakingPackage || !state.stakingAmount || Number(state.stakingAmount) <= 0 || isStaking}
                 onClick={() => {
                   const amount = Number(state.stakingAmount)
                   if (!state.selectedStakingPackage) return
@@ -2565,7 +2635,7 @@ export default function Game() {
                   handleStake(amount, state.selectedStakingPackage)
                 }}
               >
-                Confirm Stake
+                {isStaking ? 'Processing...' : 'Confirm Stake'}
               </Button>
             </div>
           </div>
