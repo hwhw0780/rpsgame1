@@ -881,7 +881,7 @@ export default function Game() {
       const newStakingRPS = (state.stakingRPS || 0) + amount
 
       // Update both balances in database
-      const response = await fetch('/api/users/stake', {  // New endpoint for staking
+      const response = await fetch('/api/users/stake', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -908,7 +908,7 @@ export default function Game() {
         ...prev,
         rpsCoins: data.user.rpsCoins,
         stakingRPS: data.user.stakingRPS,
-        stakedAmounts: data.user.stakingRecords || [],  // Use records from database
+        stakedAmounts: data.user.stakingRecords,
         stakingDialogOpen: false,
         selectedStakingPackage: null,
         stakingAmount: ''
