@@ -2,21 +2,20 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { type NextRequest } from 'next/server'
 
-interface RouteParams {
+type Props = {
   params: {
     username: string
   }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
 export async function GET(
   request: NextRequest,
-  context: RouteParams
+  { params }: Props
 ) {
   try {
-    const { username } = context.params
-
     const user = await prisma.user.findUnique({
-      where: { username },
+      where: { username: params.username },
       include: {
         transactions: {
           orderBy: { createdAt: 'desc' },
