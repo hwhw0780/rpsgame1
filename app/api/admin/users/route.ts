@@ -31,13 +31,24 @@ export async function PUT(request: Request) {
     const user = await prisma.user.update({
       where: { username },
       data: {
-        rpsCoins: Number(updates.rpsCoins),
-        usdtBalance: Number(updates.usdtBalance)
+        ...(typeof updates.rpsCoins === 'number' && { rpsCoins: updates.rpsCoins }),
+        ...(typeof updates.usdtBalance === 'number' && { usdtBalance: updates.usdtBalance }),
+        ...(typeof updates.eRPS === 'number' && { eRPS: updates.eRPS }),
+        ...(typeof updates.stakingRPS === 'number' && { stakingRPS: updates.stakingRPS }),
+        ...(typeof updates.withdrawableERPS === 'number' && { withdrawableERPS: updates.withdrawableERPS })
+      },
+      select: {
+        username: true,
+        rpsCoins: true,
+        usdtBalance: true,
+        eRPS: true,
+        stakingRPS: true,
+        withdrawableERPS: true,
+        role: true
       }
     })
 
-    const { password: _, ...userData } = user
-    return NextResponse.json({ user: userData })
+    return NextResponse.json({ user })
   } catch (error) {
     console.error('Error updating user:', error)
     return NextResponse.json(

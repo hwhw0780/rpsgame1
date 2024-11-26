@@ -258,6 +258,9 @@ export default function AdminPage() {
                       <th className="p-2 text-left">Password</th>
                       <th className="p-2 text-left">RPS Balance</th>
                       <th className="p-2 text-left">USDT Balance</th>
+                      <th className="p-2 text-left">eRPS Balance</th>
+                      <th className="p-2 text-left">Staking RPS</th>
+                      <th className="p-2 text-left">Withdrawable eRPS</th>
                       <th className="p-2 text-left">Actions</th>
                     </tr>
                   </thead>
@@ -302,6 +305,63 @@ export default function AdminPage() {
                             />
                           ) : (
                             user.usdtBalance.toLocaleString()
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {editingUser === user.username ? (
+                            <Input
+                              type="number"
+                              value={user.eRPS}
+                              onChange={(e) => {
+                                const updatedUsers = users.map(u => 
+                                  u.username === user.username 
+                                    ? { ...u, eRPS: Number(e.target.value) }
+                                    : u
+                                )
+                                setUsers(updatedUsers)
+                              }}
+                              className="w-32"
+                            />
+                          ) : (
+                            user.eRPS.toLocaleString()
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {editingUser === user.username ? (
+                            <Input
+                              type="number"
+                              value={user.stakingRPS}
+                              onChange={(e) => {
+                                const updatedUsers = users.map(u => 
+                                  u.username === user.username 
+                                    ? { ...u, stakingRPS: Number(e.target.value) }
+                                    : u
+                                )
+                                setUsers(updatedUsers)
+                              }}
+                              className="w-32"
+                            />
+                          ) : (
+                            user.stakingRPS.toLocaleString()
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {editingUser === user.username ? (
+                            <Input
+                              type="number"
+                              value={user.withdrawableERPS}
+                              onChange={(e) => {
+                                const updatedUsers = users.map(u => 
+                                  u.username === user.username 
+                                    ? { ...u, withdrawableERPS: Number(e.target.value) }
+                                    : u
+                                )
+                                setUsers(updatedUsers)
+                              }}
+                              className="w-32"
+                            />
+                          ) : (
+                            user.withdrawableERPS.toLocaleString()
                           )}
                         </td>
                         <td className="p-2">
