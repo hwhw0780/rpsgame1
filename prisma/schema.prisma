@@ -25,18 +25,15 @@ model User {
 }
 
 model StakingRecord {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  amount      Int
-  duration    Int
-  apr         Float
-  startDate   DateTime @default(now())
-  endDate     DateTime
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  @@index([userId])
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Int
+  startDate DateTime @default(now())
+  duration  Int      // in days
+  apr       Float
+  penalty   Float
+  createdAt DateTime @default(now())
 }
 
 model Transaction {
