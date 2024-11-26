@@ -9,9 +9,16 @@ export async function PUT(request: Request) {
     const user = await prisma.user.update({
       where: { username },
       data: {
-        ...(typeof rpsCoins === 'number' && { rpsCoins }),
-        ...(typeof usdtBalance === 'number' && { usdtBalance }),
-        ...(typeof eRPS === 'number' && { eRPS })
+        rpsCoins: typeof rpsCoins === 'number' ? rpsCoins : undefined,
+        usdtBalance: typeof usdtBalance === 'number' ? usdtBalance : undefined,
+        eRPS: typeof eRPS === 'number' ? eRPS : undefined
+      },
+      select: {
+        username: true,
+        rpsCoins: true,
+        usdtBalance: true,
+        eRPS: true,
+        role: true
       }
     })
 

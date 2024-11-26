@@ -506,7 +506,8 @@ export default function Game() {
     }))
   }
 
-  const playGame = (choice: Choice) => {
+  // Update the playGame function to handle eRPS balance updates
+  const playGame = async (choice: Choice) => {
     if (state.betAmount > state.eRPS) {
       toast({
         title: "Insufficient balance",
@@ -516,62 +517,62 @@ export default function Game() {
       return
     }
 
-    // Store the choice but don't start battle yet
+    // Deduct bet amount immediately
     setState(prev => ({
       ...prev,
       playerChoice: choice,
       eRPS: prev.eRPS - prev.betAmount
-    }));
+    }))
 
-    // Wait for the remaining time before starting battle
-    const remainingTime = state.choiceTimeLeft || 0;
-    setTimeout(() => {
-      // Start battle after countdown finishes
+    const bot = getRandomChoice()
+    const result = determineWinner(choice, bot)
+    
+    try {
+      const storedUser = localStorage.getItem('user')
+      if (!storedUser) return
+      const { username } = JSON.parse(storedUser)
+
+      let newERPSBalance = state.eRPS - state.betAmount // Start with current balance minus bet
+      if (result === 'win') {
+        newERPSBalance += state.betAmount * 2
+      } else if (result === 'draw') {
+        newERPSBalance += state.betAmount
+      }
+
+      // Update balance in database
+      const response = await fetch('/api/users/balance', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          eRPS: newERPSBalance
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update balance')
+      }
+
+      const data = await response.json()
+      
+      // Update state with server response
       setState(prev => ({
         ...prev,
-        gameMode: 'battling',
-        botChoice: null
-      }));
-
-      const bot = getRandomChoice()
-
-      // After 2 seconds, show bot's choice
-      setTimeout(() => {
-        setState(prev => ({
-          ...prev,
-          botChoice: bot
-        }))
-
-        // After another 4 seconds, show the result
-        setTimeout(() => {
-          const result = determineWinner(choice, bot)
-          
-          setState(prev => {
-            let newWithdrawableERPS = prev.withdrawableERPS
-            let newERPS = prev.eRPS
-
-            switch(result) {
-              case 'win':
-                // PvP: 0.95x win multiplier
-                newWithdrawableERPS = prev.withdrawableERPS + Math.floor(prev.betAmount * 1.95)
-                break
-              case 'draw':
-                newERPS = prev.eRPS + prev.betAmount
-                break
-            }
-            
-            return {
-              ...prev,
-              gameResult: result,
-              eRPS: newERPS,
-              withdrawableERPS: newWithdrawableERPS,
-              gamesPlayed: prev.gamesPlayed + 1,
-              gameMode: 'result'
-            }
-          })
-        }, 4000)
-      }, 2000)
-    }, remainingTime * 1000);  // Wait for remaining countdown time
+        botChoice: bot,
+        gameResult: result,
+        eRPS: data.user.eRPS,
+        gameMode: 'result',
+        gamesPlayed: prev.gamesPlayed + 1
+      }))
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update game result",
+        variant: "destructive"
+      })
+    }
   }
 
   // First, add a useEffect to handle the verification timer
