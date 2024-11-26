@@ -358,10 +358,16 @@ export default function Game() {
   // Add this near the top of your component
   const [userData, setUserData] = useState<any>(null)
 
-  // Add this useEffect to fetch user data
+  // Add a new state to track balance updates
+  const [isUpdatingBalance, setIsUpdatingBalance] = useState(false)
+
+  // Update the useEffect for fetching user data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        // Don't fetch if we're updating balance
+        if (isUpdatingBalance) return
+
         const response = await fetch('/api/users')
         const data = await response.json()
         
@@ -372,7 +378,7 @@ export default function Game() {
           const { username } = JSON.parse(storedUser)
           const currentUser = data.users.find((u: any) => u.username === username)
           
-          if (currentUser && state.gameMode === 'idle') {  // Only update when not in a game
+          if (currentUser && state.gameMode === 'idle') {
             setState(prev => ({
               ...prev,
               rpsCoins: currentUser.rpsCoins || 0,
@@ -386,9 +392,8 @@ export default function Game() {
       }
     }
 
-    // Only start polling when in idle mode
     let interval: NodeJS.Timeout | null = null
-    if (state.gameMode === 'idle') {
+    if (state.gameMode === 'idle' && !isUpdatingBalance) {
       fetchUserData()
       interval = setInterval(fetchUserData, 5000)
     }
@@ -396,7 +401,7 @@ export default function Game() {
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [state.gameMode])  // Add gameMode as dependency
+  }, [state.gameMode, isUpdatingBalance])  // Add isUpdatingBalance as dependency
 
   // Update useEffect for currency rates
   useEffect(() => {
@@ -812,15 +817,14 @@ export default function Game() {
     }
 
     try {
+      setIsUpdatingBalance(true)  // Disable polling
       const storedUser = localStorage.getItem('user')
       if (!storedUser) return
       const { username } = JSON.parse(storedUser)
 
-      // Calculate new balances
       const newRPSBalance = state.rpsCoins - amount
       const newERPSBalance = state.eRPS + amount
 
-      // Update database first
       const response = await fetch('/api/users/balance', {
         method: 'PUT',
         headers: {
@@ -829,8 +833,7 @@ export default function Game() {
         body: JSON.stringify({
           username,
           rpsCoins: newRPSBalance,
-          eRPS: newERPSBalance,
-          updateType: 'deposit'  // Add this to identify the type of update
+          eRPS: newERPSBalance
         })
       })
 
@@ -839,29 +842,27 @@ export default function Game() {
       }
 
       const data = await response.json()
+      
+      setState(prev => ({
+        ...prev,
+        rpsCoins: data.user.rpsCoins,
+        eRPS: data.user.eRPS,
+        stakingAmount: '',
+        stakingDialogOpen: false
+      }))
 
-      // Only update state if database update was successful
-      if (data.user) {
-        setState(prev => ({
-          ...prev,
-          rpsCoins: data.user.rpsCoins,
-          eRPS: data.user.eRPS,
-          stakingAmount: '',
-          stakingDialogOpen: false,
-          gameMode: 'idle'  // Reset game mode to allow polling
-        }))
-
-        toast({
-          title: "Success",
-          description: `Deposited ${amount.toLocaleString()} RPS to eRPS`,
-        })
-      }
+      toast({
+        title: "Success",
+        description: `Deposited ${amount.toLocaleString()} RPS to eRPS`,
+      })
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to deposit RPS",
         variant: "destructive"
       })
+    } finally {
+      setIsUpdatingBalance(false)  // Re-enable polling
     }
   }
 
