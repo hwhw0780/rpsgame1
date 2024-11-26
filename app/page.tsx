@@ -529,8 +529,8 @@ export default function Game() {
       ...prev,
       playerChoice: choice,
       eRPS: prev.eRPS - prev.betAmount,
-      gameMode: 'battling',  // Change to battling mode first
-      botChoice: null  // Reset bot choice
+      gameMode: 'battling',
+      botChoice: null
     }))
 
     const bot = getRandomChoice()
@@ -541,11 +541,21 @@ export default function Game() {
       if (!storedUser) return
       const { username } = JSON.parse(storedUser)
 
-      let newERPSBalance = state.eRPS - state.betAmount
-      if (result === 'win') {
-        newERPSBalance += state.betAmount * 2
-      } else if (result === 'draw') {
-        newERPSBalance += state.betAmount
+      let newERPSBalance = state.eRPS
+      let newWithdrawableERPS = state.withdrawableERPS
+
+      switch(result) {
+        case 'win':
+          // Keep eRPS balance, add to withdrawable
+          newWithdrawableERPS += state.betAmount * 2
+          break
+        case 'draw':
+          // Return bet amount to eRPS balance
+          newERPSBalance += state.betAmount
+          break
+        case 'lose':
+          // Already deducted from eRPS balance
+          break
       }
 
       // Show bot's choice after 2 seconds
@@ -565,7 +575,8 @@ export default function Game() {
             },
             body: JSON.stringify({
               username,
-              eRPS: newERPSBalance
+              eRPS: newERPSBalance,
+              withdrawableERPS: newWithdrawableERPS
             })
           })
 
@@ -580,9 +591,28 @@ export default function Game() {
             ...prev,
             gameResult: result,
             eRPS: data.user.eRPS,
+            withdrawableERPS: data.user.withdrawableERPS,
             gameMode: 'result',
             gamesPlayed: prev.gamesPlayed + 1
           }))
+
+          // Show appropriate toast message
+          let message = ''
+          switch(result) {
+            case 'win':
+              message = `Won ${state.betAmount * 2} withdrawable eRPS!`
+              break
+            case 'draw':
+              message = 'Bet returned to eRPS balance'
+              break
+            case 'lose':
+              message = `Lost ${state.betAmount} eRPS`
+              break
+          }
+          toast({
+            title: result.charAt(0).toUpperCase() + result.slice(1),
+            description: message
+          })
         }, 2000)
       }, 2000)
     } catch (error) {
