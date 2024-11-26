@@ -866,6 +866,72 @@ export default function Game() {
     }
   }
 
+  // Add this function to handle staking
+  const handleStake = async (amount: number, stakingPackage: any) => {
+    try {
+      setIsUpdatingBalance(true)  // Disable polling
+      const storedUser = localStorage.getItem('user')
+      if (!storedUser) return
+      const { username } = JSON.parse(storedUser)
+
+      // Calculate new balances
+      const newRPSBalance = state.rpsCoins - amount
+      const newStakingRPS = (state.stakingRPS || 0) + amount  // Add null check
+
+      // Update balances in database
+      const response = await fetch('/api/users/balance', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          rpsCoins: newRPSBalance,
+          stakingRPS: newStakingRPS
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update balance')
+      }
+
+      const data = await response.json()
+
+      // Update state with server response
+      setState(prev => ({
+        ...prev,
+        rpsCoins: data.user.rpsCoins || 0,  // Add null checks
+        stakingRPS: data.user.stakingRPS || 0,
+        stakedAmounts: [
+          ...(prev.stakedAmounts || []),  // Add null check
+          {
+            amount,
+            startDate: new Date().toISOString(),
+            duration: stakingPackage.days,
+            apr: stakingPackage.apr,
+            penalty: stakingPackage.penalty
+          }
+        ],
+        stakingDialogOpen: false,
+        selectedStakingPackage: null,
+        stakingAmount: ''
+      }))
+
+      toast({
+        title: "Staking Successful",
+        description: `${amount.toLocaleString()} RPS has been staked for ${stakingPackage.days} days at ${stakingPackage.apr}% APR`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to stake RPS",
+        variant: "destructive"
+      })
+    } finally {
+      setIsUpdatingBalance(false)  // Re-enable polling
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
@@ -2470,8 +2536,9 @@ export default function Game() {
               <Button
                 className="w-full bg-gradient-to-r from-purple-600 to-blue-600"
                 disabled={!state.selectedStakingPackage || !state.stakingAmount || Number(state.stakingAmount) <= 0}
-                onClick={async () => {
+                onClick={() => {
                   const amount = Number(state.stakingAmount)
+                  if (!state.selectedStakingPackage) return
                   
                   if (amount <= 0 || amount > state.rpsCoins) {
                     toast({
@@ -2482,67 +2549,7 @@ export default function Game() {
                     return
                   }
 
-                  try {
-                    setIsUpdatingBalance(true)  // Disable polling
-                    const storedUser = localStorage.getItem('user')
-                    if (!storedUser) return
-                    const { username } = JSON.parse(storedUser)
-
-                    // Calculate new balances
-                    const newRPSBalance = state.rpsCoins - amount
-                    const newStakingRPS = state.stakingRPS + amount
-
-                    // Update balances in database
-                    const response = await fetch('/api/users/balance', {
-                      method: 'PUT',
-                      headers: {
-                        'Content-Type': 'application/json'
-                      },
-                      body: JSON.stringify({
-                        username,
-                        rpsCoins: newRPSBalance,
-                        stakingRPS: newStakingRPS
-                      })
-                    })
-
-                    if (!response.ok) {
-                      throw new Error('Failed to update balance')
-                    }
-
-                    const data = await response.json()
-
-                    setState(prev => ({
-                      ...prev,
-                      rpsCoins: data.user.rpsCoins,
-                      stakingRPS: data.user.stakingRPS,
-                      stakedAmounts: [
-                        ...prev.stakedAmounts,
-                        {
-                          amount,
-                          startDate: new Date().toISOString(),
-                          duration: prev.selectedStakingPackage!.days,
-                          apr: prev.selectedStakingPackage!.apr,
-                          penalty: prev.selectedStakingPackage!.penalty
-                        }
-                      ],
-                      stakingDialogOpen: false,
-                      selectedStakingPackage: null,
-                      stakingAmount: ''
-                    }))
-
-                    toast({
-                      title: "Staking Successful",
-                      description: `${amount.toLocaleString()} RPS has been staked for ${state.selectedStakingPackage!.days} days at ${state.selectedStakingPackage!.apr}% APR`,
-                    })
-                  } catch (error) {
-                    toast({
-                      title: "Error",
-                      description: "Failed to stake RPS",
-                      variant: "destructive"
-                    })
-                  } finally {
-                    setIsUpdatingBalance(false)  // Re-enable polling
-                  }
+                  handleStake(amount, state.selectedStakingPackage)
                 }}
               >
                 Confirm Stake
