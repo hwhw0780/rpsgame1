@@ -1466,7 +1466,7 @@ export default function Game() {
         {/* Game Arena */}
         <Card className="bg-gradient-to-br from-slate-900/90 via-purple-900/90 to-slate-900/90 backdrop-blur-sm border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)] hover:shadow-[0_0_30px_rgba(168,85,247,0.2)] transition-all duration-300">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">
+            <CardTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 text-transparent bg-clip-text">
               RPS Game Arena
             </CardTitle>
             <div className="grid grid-cols-3 gap-4 mt-4">
@@ -1633,31 +1633,21 @@ export default function Game() {
                 {/* Game Mode Selection */}
                 <div className="grid grid-cols-2 gap-4">
                   <Button 
-                    onClick={handlePVB}
-                    className="h-32 text-xl bg-gradient-to-br from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border border-blue-400/20"
+                    onClick={() => handlePVPSegment(100)}
+                    className="h-32 bg-gradient-to-br from-indigo-600/50 to-purple-600/50 hover:from-indigo-600 hover:to-purple-600"
                   >
-                    <div className="flex flex-col items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-200">
-                        <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
-                        <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
-                        <path d="M12 12a2 2 0 0 0 0 4 2 2 0 0 0 0-4z" />
-                      </svg>
-                      Play vs Bot
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">Play VS Player</div>
+                      <div className="text-sm text-gray-300">Bet 100 eRPS</div>
                     </div>
                   </Button>
-                  
                   <Button 
-                    onClick={() => setState(prev => ({ ...prev, gameMode: 'pvp' }))}
-                    className="h-32 text-xl bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 border border-purple-400/20"
+                    onClick={handlePVB}
+                    className="h-32 bg-gradient-to-br from-blue-600/50 to-cyan-600/50 hover:from-blue-600 hover:to-cyan-600"
                   >
-                    <div className="flex flex-col items-center gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-purple-200">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                      </svg>
-                      Play vs Player
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">Play VS Bot</div>
+                      <div className="text-sm text-gray-300">Practice Mode</div>
                     </div>
                   </Button>
                 </div>
