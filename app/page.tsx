@@ -1095,6 +1095,67 @@ export default function Game() {
     }
   }
 
+  // Add this function to handle unstaking
+  const handleUnstake = async () => {
+    try {
+      setIsUpdatingBalance(true)  // Prevent polling during update
+      const storedUser = localStorage.getItem('user')
+      if (!storedUser) return
+      const { username } = JSON.parse(storedUser)
+
+      // Calculate total return and penalty
+      const totalReturn = calculateUnstakeReturn()
+      const totalPenalty = calculateTotalPenalty()
+      const finalAmount = totalReturn - totalPenalty
+
+      // Calculate new balances
+      const newRPSBalance = state.rpsCoins + finalAmount
+      const newStakingRPS = 0  // Reset staking balance
+
+      // Update balances in database
+      const response = await fetch('/api/users/balance', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          rpsCoins: newRPSBalance,
+          stakingRPS: newStakingRPS,
+          stakedAmounts: []  // Clear staked amounts
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update balance')
+      }
+
+      const data = await response.json()
+
+      // Update state with server response
+      setState(prev => ({
+        ...prev,
+        rpsCoins: data.user.rpsCoins,
+        stakingRPS: data.user.stakingRPS,
+        stakedAmounts: [],  // Clear staked amounts
+        unstakeDialogOpen: false
+      }))
+
+      toast({
+        title: "Success",
+        description: `Unstaked ${totalReturn.toLocaleString()} RPS (Penalty: ${totalPenalty.toLocaleString()} RPS)`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to unstake RPS",
+        variant: "destructive"
+      })
+    } finally {
+      setIsUpdatingBalance(false)  // Re-enable polling
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
@@ -1375,7 +1436,6 @@ export default function Game() {
                         }))}
                       >
                         Cancel
-                      </Button>
                     </div>
                     <div className="text-xs text-gray-400 text-right space-y-1">
                       <div>Rate: 1 USDT = {(1 / 0.000219).toLocaleString()} RPS</div>
@@ -2726,23 +2786,8 @@ export default function Game() {
 
               <div className="flex gap-2">
                 <Button
-                  className="flex-1 bg-red-600 hover:bg-red-700"
-                  onClick={() => {
-                    const returnAmount = calculateUnstakeReturn();
-
-                    setState(prev => ({
-                      ...prev,
-                      rpsCoins: prev.rpsCoins + returnAmount,
-                      stakingRPS: 0,
-                      stakedAmounts: [],
-                      unstakeDialogOpen: false
-                    }));
-
-                    toast({
-                      title: "Unstake Successful",
-                      description: `${returnAmount.toLocaleString()} RPS has been returned to your balance (after penalties).`,
-                    });
-                  }}
+                  onClick={handleUnstake}
+                  className="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700"
                 >
                   Confirm Unstake
                 </Button>
