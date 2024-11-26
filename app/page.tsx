@@ -816,9 +816,11 @@ export default function Game() {
       if (!storedUser) return
       const { username } = JSON.parse(storedUser)
 
+      // Calculate new balances
       const newRPSBalance = state.rpsCoins - amount
       const newERPSBalance = state.eRPS + amount
 
+      // Update database first
       const response = await fetch('/api/users/balance', {
         method: 'PUT',
         headers: {
@@ -827,7 +829,8 @@ export default function Game() {
         body: JSON.stringify({
           username,
           rpsCoins: newRPSBalance,
-          eRPS: newERPSBalance
+          eRPS: newERPSBalance,
+          updateType: 'deposit'  // Add this to identify the type of update
         })
       })
 
@@ -836,19 +839,23 @@ export default function Game() {
       }
 
       const data = await response.json()
-      
-      setState(prev => ({
-        ...prev,
-        rpsCoins: data.user.rpsCoins,
-        eRPS: data.user.eRPS,
-        stakingAmount: '',
-        stakingDialogOpen: false
-      }))
 
-      toast({
-        title: "Success",
-        description: `Deposited ${amount.toLocaleString()} RPS to eRPS`,
-      })
+      // Only update state if database update was successful
+      if (data.user) {
+        setState(prev => ({
+          ...prev,
+          rpsCoins: data.user.rpsCoins,
+          eRPS: data.user.eRPS,
+          stakingAmount: '',
+          stakingDialogOpen: false,
+          gameMode: 'idle'  // Reset game mode to allow polling
+        }))
+
+        toast({
+          title: "Success",
+          description: `Deposited ${amount.toLocaleString()} RPS to eRPS`,
+        })
+      }
     } catch (error) {
       toast({
         title: "Error",
