@@ -780,6 +780,60 @@ export default function Game() {
     amount: ''
   })
 
+  // Find this section where eRPS deposit is handled
+  const handleERPSDeposit = async () => {
+    const amount = Number(state.stakingAmount)
+    if (amount <= 0 || amount > state.rpsCoins) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount within your RPS balance",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      const storedUser = localStorage.getItem('user')
+      if (!storedUser) return
+      const { username } = JSON.parse(storedUser)
+
+      const response = await fetch('/api/users/balance', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          rpsCoins: state.rpsCoins - amount,  // Decrease RPS balance
+          eRPS: state.eRPS + amount  // Increase eRPS balance
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update balance')
+      }
+
+      setState(prev => ({
+        ...prev,
+        rpsCoins: prev.rpsCoins - amount,  // Decrease RPS balance
+        eRPS: prev.eRPS + amount,  // Increase eRPS balance
+        stakingAmount: '',  // Reset input
+        stakingDialogOpen: false  // Close dialog
+      }))
+
+      toast({
+        title: "Success",
+        description: `Deposited ${amount.toLocaleString()} RPS to eRPS`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to deposit RPS",
+        variant: "destructive"
+      })
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
@@ -1403,7 +1457,7 @@ export default function Game() {
                     <div className="flex flex-col items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-200">
                         <path d="M20 12V8H6a2 2 0 0 1-2-2c0-1.1.9-2 2-2h12v4" />
-                        <path d="M4 6v12c0 1.1.9 2 2 2h14v-4" />
+                        <path d="M4 6v12c0 1.1.9 2 2 2 2h14v-4" />
                         <path d="M12 12a2 2 0 0 0 0 4 2 2 0 0 0 0-4z" />
                       </svg>
                       Play vs Bot
@@ -2440,7 +2494,7 @@ export default function Game() {
                 className="text-gray-400 hover:text-gray-300"
                 onClick={() => setState(prev => ({ ...prev, unstakeDialogOpen: false }))}
               >
-                ���
+                ✕
               </Button>
             </div>
 
