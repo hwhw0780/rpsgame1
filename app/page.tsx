@@ -1098,46 +1098,41 @@ export default function Game() {
   // Add this function to handle unstaking
   const handleUnstake = async () => {
     try {
-      setIsUpdatingBalance(true)  // Prevent polling during update
+      setIsUpdatingBalance(true)
       const storedUser = localStorage.getItem('user')
       if (!storedUser) return
       const { username } = JSON.parse(storedUser)
 
-      // Calculate total return and penalty
       const totalReturn = calculateUnstakeReturn()
       const totalPenalty = calculateTotalPenalty()
       const finalAmount = totalReturn - totalPenalty
 
-      // Calculate new balances
       const newRPSBalance = state.rpsCoins + finalAmount
-      const newStakingRPS = 0  // Reset staking balance
+      const newStakingRPS = 0
 
-      // Update balances in database
-      const response = await fetch('/api/users/balance', {
-        method: 'PUT',
+      const response = await fetch('/api/users/unstake', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           username,
-          rpsCoins: newRPSBalance,
-          stakingRPS: newStakingRPS,
-          stakedAmounts: []  // Clear staked amounts
+          newRPSBalance,
+          newStakingRPS
         })
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update balance')
+        throw new Error('Failed to unstake')
       }
 
       const data = await response.json()
 
-      // Update state with server response
       setState(prev => ({
         ...prev,
         rpsCoins: data.user.rpsCoins,
         stakingRPS: data.user.stakingRPS,
-        stakedAmounts: [],  // Clear staked amounts
+        stakedAmounts: data.user.stakingRecords || [],
         unstakeDialogOpen: false
       }))
 
@@ -1152,7 +1147,7 @@ export default function Game() {
         variant: "destructive"
       })
     } finally {
-      setIsUpdatingBalance(false)  // Re-enable polling
+      setIsUpdatingBalance(false)
     }
   }
 

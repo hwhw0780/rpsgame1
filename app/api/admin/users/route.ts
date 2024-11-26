@@ -51,12 +51,14 @@ export async function PUT(request: Request) {
         ...(typeof updates.withdrawableERPS === 'number' && { withdrawableERPS: updates.withdrawableERPS })
       },
       select: {
+        id: true,
         username: true,
         rpsCoins: true,
         usdtBalance: true,
         eRPS: true,
         stakingRPS: true,
         withdrawableERPS: true,
+        stakingRecords: true,
         role: true
       }
     })

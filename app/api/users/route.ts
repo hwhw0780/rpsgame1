@@ -29,24 +29,34 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const data = await request.json()
-    const { username, rpsCoins, usdtBalance, eRPS, withdrawableERPS } = data
+    const { username, rpsCoins, usdtBalance, eRPS, withdrawableERPS, stakingRPS } = data
 
-    const user = await prisma.user.update({
-      where: { username },
-      data: {
-        ...(typeof rpsCoins === 'number' && { rpsCoins }),
-        ...(typeof usdtBalance === 'number' && { usdtBalance }),
-        ...(typeof eRPS === 'number' && { eRPS }),
-        ...(typeof withdrawableERPS === 'number' && { withdrawableERPS })
-      },
-      select: {
-        username: true,
-        rpsCoins: true,
-        usdtBalance: true,
-        eRPS: true,
-        withdrawableERPS: true,
-        role: true
-      }
+    // Use transaction to ensure atomic updates
+    const user = await prisma.$transaction(async (tx) => {
+      // Update user balances
+      const updatedUser = await tx.user.update({
+        where: { username },
+        data: {
+          ...(typeof rpsCoins === 'number' && { rpsCoins }),
+          ...(typeof usdtBalance === 'number' && { usdtBalance }),
+          ...(typeof eRPS === 'number' && { eRPS }),
+          ...(typeof withdrawableERPS === 'number' && { withdrawableERPS }),
+          ...(typeof stakingRPS === 'number' && { stakingRPS })
+        },
+        select: {
+          id: true,
+          username: true,
+          rpsCoins: true,
+          usdtBalance: true,
+          eRPS: true,
+          withdrawableERPS: true,
+          stakingRPS: true,
+          stakingRecords: true,
+          role: true
+        }
+      })
+
+      return updatedUser
     })
 
     return NextResponse.json({ user })
