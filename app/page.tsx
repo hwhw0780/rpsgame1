@@ -871,16 +871,16 @@ export default function Game() {
   // Add this function to handle staking
   const handleStake = async (amount: number, stakingPackage: any) => {
     try {
-      setIsUpdatingBalance(true)  // Disable polling
+      setIsUpdatingBalance(true)
       const storedUser = localStorage.getItem('user')
       if (!storedUser) return
       const { username } = JSON.parse(storedUser)
 
       // Calculate new balances
       const newRPSBalance = state.rpsCoins - amount
-      const newStakingRPS = (state.stakingRPS || 0) + amount  // Add null check
+      const newStakingRPS = state.stakingRPS + amount
 
-      // Update balances in database
+      // Update both balances in database
       const response = await fetch('/api/users/balance', {
         method: 'PUT',
         headers: {
@@ -899,13 +899,13 @@ export default function Game() {
 
       const data = await response.json()
 
-      // Update state with server response
+      // Update state with both new balances
       setState(prev => ({
         ...prev,
-        rpsCoins: data.user.rpsCoins || 0,  // Add null checks
-        stakingRPS: data.user.stakingRPS || 0,
+        rpsCoins: data.user.rpsCoins,
+        stakingRPS: data.user.stakingRPS,
         stakedAmounts: [
-          ...(prev.stakedAmounts || []),  // Add null check
+          ...prev.stakedAmounts,
           {
             amount,
             startDate: new Date().toISOString(),
@@ -930,7 +930,7 @@ export default function Game() {
         variant: "destructive"
       })
     } finally {
-      setIsUpdatingBalance(false)  // Re-enable polling
+      setIsUpdatingBalance(false)
     }
   }
 
