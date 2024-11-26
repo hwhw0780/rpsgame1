@@ -1249,18 +1249,20 @@ export default function Game() {
                       >
                         {isSwapping ? 'Processing...' : 'Confirm Swap'}
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-400"
-                        onClick={() => setState(prev => ({
-                          ...prev,
-                          swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false },
-                          swapAmount: ''
-                        }))}
-                      >
-                        Cancel
-                      </Button>
+                      <div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-400"
+                          onClick={() => setState(prev => ({
+                            ...prev,
+                            swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false },
+                            swapAmount: ''
+                          }))}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
                     <div className="text-xs text-gray-400 text-right space-y-1">
                       <div>Rate: 1 RPS = $0.000219 USDT</div>
@@ -1420,17 +1422,20 @@ export default function Game() {
                       >
                         Confirm
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-400"
-                        onClick={() => setState(prev => ({
-                          ...prev,
-                          swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: false },
-                          swapAmount: ''
-                        }))}
-                      >
-                        Cancel
+                      <div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-gray-400"
+                          onClick={() => setState(prev => ({
+                            ...prev,
+                            swapDialogOpen: { ...prev.swapDialogOpen, usdtToRps: false },
+                            swapAmount: ''
+                          }))}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
                     <div className="text-xs text-gray-400 text-right space-y-1">
                       <div>Rate: 1 USDT = {(1 / 0.000219).toLocaleString()} RPS</div>
