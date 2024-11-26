@@ -4,11 +4,9 @@ import { prisma } from '@/lib/prisma'
 export async function PUT(request: Request) {
   try {
     const data = await request.json()
-    const { username, rpsCoins, usdtBalance, eRPS, withdrawableERPS, stakingRPS, stakedAmounts } = data
+    const { username, rpsCoins, usdtBalance, eRPS, withdrawableERPS, stakingRPS, dailyRewards } = data
 
-    // Use transaction to ensure atomic updates
     const user = await prisma.$transaction(async (tx) => {
-      // Update user balances
       const updatedUser = await tx.user.update({
         where: { username },
         data: {
@@ -16,7 +14,8 @@ export async function PUT(request: Request) {
           ...(typeof usdtBalance === 'number' && { usdtBalance }),
           ...(typeof eRPS === 'number' && { eRPS }),
           ...(typeof withdrawableERPS === 'number' && { withdrawableERPS }),
-          ...(typeof stakingRPS === 'number' && { stakingRPS })
+          ...(typeof stakingRPS === 'number' && { stakingRPS }),
+          ...(typeof dailyRewards === 'number' && { dailyRewards })
         },
         select: {
           id: true,
@@ -26,16 +25,10 @@ export async function PUT(request: Request) {
           eRPS: true,
           withdrawableERPS: true,
           stakingRPS: true,
+          dailyRewards: true,
           role: true
         }
       })
-
-      // If stakedAmounts is provided (for unstaking), clear staking records
-      if (stakedAmounts !== undefined) {
-        await tx.stakingRecord.deleteMany({
-          where: { userId: updatedUser.id }
-        })
-      }
 
       return updatedUser
     })

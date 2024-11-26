@@ -17,6 +17,7 @@ model User {
   usdtBalance      Float           @default(0)
   eRPS             Int             @default(0)
   withdrawableERPS Int             @default(0)
+  dailyRewards     Float           @default(0)
   lastLogin        DateTime?
   createdAt        DateTime        @default(now())
   stakingRecords   StakingRecord[]

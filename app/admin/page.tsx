@@ -15,6 +15,7 @@ interface UserData {
   eRPS: number
   stakingRPS: number
   withdrawableERPS: number
+  dailyRewards: number
 }
 
 export default function AdminPage() {
@@ -29,7 +30,8 @@ export default function AdminPage() {
     usdtBalance: 0,
     eRPS: 0,
     stakingRPS: 0,
-    withdrawableERPS: 0
+    withdrawableERPS: 0,
+    dailyRewards: 0
   })
   const [username, setUsername] = useState<string>('')
 
@@ -126,7 +128,8 @@ export default function AdminPage() {
         usdtBalance: 0,
         eRPS: 0,
         stakingRPS: 0,
-        withdrawableERPS: 0
+        withdrawableERPS: 0,
+        dailyRewards: 0
       })
       setShowCreateForm(false)
       fetchUsers()
@@ -245,6 +248,14 @@ export default function AdminPage() {
                     onChange={(e) => setNewUser(prev => ({ ...prev, withdrawableERPS: Number(e.target.value) }))}
                   />
                 </div>
+                <div>
+                  <Label className="text-white">Daily Rewards</Label>
+                  <Input
+                    type="number"
+                    value={newUser.dailyRewards}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, dailyRewards: Number(e.target.value) }))}
+                  />
+                </div>
               </div>
               <div className="flex justify-end gap-2 mt-4">
                 <Button
@@ -280,6 +291,7 @@ export default function AdminPage() {
                       <th className="p-2 text-left">eRPS Balance</th>
                       <th className="p-2 text-left">Staking RPS</th>
                       <th className="p-2 text-left">Withdrawable eRPS</th>
+                      <th className="p-2 text-left">Daily Rewards</th>
                       <th className="p-2 text-left">Actions</th>
                     </tr>
                   </thead>
@@ -381,6 +393,25 @@ export default function AdminPage() {
                             />
                           ) : (
                             user.withdrawableERPS.toLocaleString()
+                          )}
+                        </td>
+                        <td className="p-2">
+                          {editingUser === user.username ? (
+                            <Input
+                              type="number"
+                              value={user.dailyRewards || 0}
+                              onChange={(e) => {
+                                const updatedUsers = users.map(u => 
+                                  u.username === user.username 
+                                    ? { ...u, dailyRewards: Number(e.target.value) }
+                                    : u
+                                )
+                                setUsers(updatedUsers)
+                              }}
+                              className="w-32"
+                            />
+                          ) : (
+                            (user.dailyRewards || 0).toLocaleString()
                           )}
                         </td>
                         <td className="p-2">

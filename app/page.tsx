@@ -689,19 +689,42 @@ export default function Game() {
   };
 
   // Add helper function for daily rewards calculation
-  const calculateDailyRewards = () => {
+  const calculateDailyRewards = async () => {
     if (state.stakedAmounts.length === 0) return 0;
     
     const dailyRewards = state.stakedAmounts.reduce((sum, stake) => {
-      // Calculate yearly rewards: amount * (apr/100)
       const yearlyRewards = stake.amount * (stake.apr / 100);
-      // Convert to daily rewards
       const dailyReward = yearlyRewards / 365;
       return sum + dailyReward;
     }, 0);
-    
-    return dailyRewards;
-  };
+
+    try {
+      const storedUser = localStorage.getItem('user')
+      if (!storedUser) return 0
+      const { username } = JSON.parse(storedUser)
+
+      // Update daily rewards in database
+      const response = await fetch('/api/users/balance', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          dailyRewards
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update daily rewards')
+      }
+
+      return dailyRewards
+    } catch (error) {
+      console.error('Error updating daily rewards:', error)
+      return dailyRewards
+    }
+  }
 
   const calculateUnstakeReturn = () => {
     if (state.stakedAmounts.length === 0) return 0;
