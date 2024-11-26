@@ -807,6 +807,9 @@ export default function Game() {
       if (!storedUser) return
       const { username } = JSON.parse(storedUser)
 
+      const newRPSBalance = state.rpsCoins - amount
+      const newERPSBalance = state.eRPS + amount
+
       const response = await fetch('/api/users/balance', {
         method: 'PUT',
         headers: {
@@ -814,8 +817,8 @@ export default function Game() {
         },
         body: JSON.stringify({
           username,
-          rpsCoins: state.rpsCoins - amount,  // Decrease RPS balance
-          eRPS: state.eRPS + amount  // Increase eRPS balance
+          rpsCoins: newRPSBalance,
+          eRPS: newERPSBalance
         })
       })
 
@@ -823,12 +826,14 @@ export default function Game() {
         throw new Error('Failed to update balance')
       }
 
+      const data = await response.json()
+      
       setState(prev => ({
         ...prev,
-        rpsCoins: prev.rpsCoins - amount,  // Decrease RPS balance
-        eRPS: prev.eRPS + amount,  // Increase eRPS balance
-        stakingAmount: '',  // Reset input
-        stakingDialogOpen: false  // Close dialog
+        rpsCoins: data.user.rpsCoins,
+        eRPS: data.user.eRPS,
+        stakingAmount: '',
+        stakingDialogOpen: false
       }))
 
       toast({

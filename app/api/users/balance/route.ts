@@ -4,13 +4,14 @@ import { prisma } from '@/lib/prisma'
 export async function PUT(request: Request) {
   try {
     const data = await request.json()
-    const { username, rpsCoins, usdtBalance } = data
+    const { username, rpsCoins, usdtBalance, eRPS } = data
 
     const user = await prisma.user.update({
       where: { username },
       data: {
-        rpsCoins: Number(rpsCoins),
-        usdtBalance: Number(usdtBalance)
+        ...(typeof rpsCoins === 'number' && { rpsCoins }),
+        ...(typeof usdtBalance === 'number' && { usdtBalance }),
+        ...(typeof eRPS === 'number' && { eRPS })
       }
     })
 
