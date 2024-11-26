@@ -15,7 +15,18 @@ export async function GET() {
         createdAt: true
       }
     })
-    return NextResponse.json({ users })
+
+    // Ensure all fields have default values
+    const sanitizedUsers = users.map(user => ({
+      ...user,
+      rpsCoins: user.rpsCoins || 0,
+      stakingRPS: user.stakingRPS || 0,
+      usdtBalance: user.usdtBalance || 0,
+      eRPS: user.eRPS || 0,
+      withdrawableERPS: user.withdrawableERPS || 0
+    }))
+
+    return NextResponse.json({ users: sanitizedUsers })
   } catch (error) {
     console.error('Error fetching users:', error)
     return NextResponse.json(

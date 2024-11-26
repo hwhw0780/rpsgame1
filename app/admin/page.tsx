@@ -349,7 +349,7 @@ export default function AdminPage() {
                           {editingUser === user.username ? (
                             <Input
                               type="number"
-                              value={user.stakingRPS}
+                              value={user.stakingRPS || 0}
                               onChange={(e) => {
                                 const updatedUsers = users.map(u => 
                                   u.username === user.username 
@@ -361,7 +361,7 @@ export default function AdminPage() {
                               className="w-32"
                             />
                           ) : (
-                            user.stakingRPS.toLocaleString()
+                            (user.stakingRPS || 0).toLocaleString()
                           )}
                         </td>
                         <td className="p-2">
