@@ -58,7 +58,8 @@ export async function POST(request: Request) {
           amount,
           duration,
           apr,
-          penalty
+          penalty,
+          startDate: new Date()
         }
       })
     ])
