@@ -383,7 +383,9 @@ export default function Game() {
               ...prev,
               rpsCoins: currentUser.rpsCoins || 0,
               usdtBalance: currentUser.usdtBalance || 0,
-              eRPS: currentUser.eRPS || 0
+              eRPS: currentUser.eRPS || 0,
+              stakingRPS: currentUser.stakingRPS || 0,  // Add this line
+              withdrawableERPS: currentUser.withdrawableERPS || 0  // Add this line too
             }))
           }
         }
