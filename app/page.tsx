@@ -929,6 +929,74 @@ export default function Game() {
     }
   }
 
+  // Add this state
+  const [isSwapping, setIsSwapping] = useState(false)
+
+  // Update the RPS to USDT swap handler
+  const handleRPStoUSDTSwap = async () => {
+    if (isSwapping) return  // Prevent multiple clicks
+    
+    const amount = Number(state.swapAmount)
+    if (amount <= 0 || amount > state.rpsCoins) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount within your RPS balance",
+        variant: "destructive"
+      })
+      return
+    }
+
+    try {
+      setIsSwapping(true)  // Disable button
+      const storedUser = localStorage.getItem('user')
+      if (!storedUser) return
+      const { username } = JSON.parse(storedUser)
+
+      const usdtAmount = amount * 0.000219  // RPS to USDT rate
+      const newRPSBalance = state.rpsCoins - amount
+      const newUSDTBalance = state.usdtBalance + usdtAmount
+
+      const response = await fetch('/api/users/balance', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username,
+          rpsCoins: newRPSBalance,
+          usdtBalance: newUSDTBalance
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update balance')
+      }
+
+      const data = await response.json()
+
+      setState(prev => ({
+        ...prev,
+        rpsCoins: data.user.rpsCoins,
+        usdtBalance: data.user.usdtBalance,
+        swapAmount: '',
+        swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false }
+      }))
+
+      toast({
+        title: "Success",
+        description: `Swapped ${amount.toLocaleString()} RPS to ${usdtAmount.toFixed(2)} USDT`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to swap RPS to USDT",
+        variant: "destructive"
+      })
+    } finally {
+      setIsSwapping(false)  // Re-enable button
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
       {/* Top Navigation */}
@@ -1019,65 +1087,13 @@ export default function Game() {
                         className="w-32 bg-blue-900/20 border-blue-500/20 text-white"
                       />
                       <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="bg-blue-900/20 border-blue-500/20 hover:bg-blue-900/40 text-blue-400"
-                        onClick={async () => {
-                          const amount = Number(state.swapAmount)
-                          if (amount <= 0 || amount > state.rpsCoins) {
-                            toast({
-                              title: "Invalid Amount",
-                              description: "Please enter a valid amount within your balance.",
-                              variant: "destructive"
-                            })
-                            return
-                          }
-
-                          const usdtAmount = amount * 0.000219
-
-                          try {
-                            const storedUser = localStorage.getItem('user')
-                            if (!storedUser) return
-                            const { username } = JSON.parse(storedUser)
-
-                            const response = await fetch('/api/users/balance', {
-                              method: 'PUT',
-                              headers: {
-                                'Content-Type': 'application/json'
-                              },
-                              body: JSON.stringify({
-                                username,
-                                rpsCoins: state.rpsCoins - amount,
-                                usdtBalance: state.usdtBalance + usdtAmount
-                              })
-                            })
-
-                            if (!response.ok) {
-                              throw new Error('Failed to update balance')
-                            }
-
-                            setState(prev => ({
-                              ...prev,
-                              rpsCoins: prev.rpsCoins - amount,
-                              usdtBalance: prev.usdtBalance + usdtAmount,
-                              swapDialogOpen: { ...prev.swapDialogOpen, rpsToUsdt: false },
-                              swapAmount: ''
-                            }))
-
-                            toast({
-                              title: "Swap Successful",
-                              description: `Swapped ${amount.toLocaleString()} RPS to ${usdtAmount.toFixed(2)} USDT`,
-                            })
-                          } catch (error) {
-                            toast({
-                              title: "Error",
-                              description: "Failed to complete swap",
-                              variant: "destructive"
-                            })
-                          }
-                        }}
+                        onClick={handleRPStoUSDTSwap}
+                        disabled={isSwapping}  // Disable during swap
+                        className={`bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 ${
+                          isSwapping ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                       >
-                        Confirm
+                        {isSwapping ? 'Processing...' : 'Confirm Swap'}
                       </Button>
                       <Button
                         variant="ghost"
