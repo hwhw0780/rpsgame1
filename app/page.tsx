@@ -878,18 +878,22 @@ export default function Game() {
 
       // Calculate new balances
       const newRPSBalance = state.rpsCoins - amount
-      const newStakingRPS = state.stakingRPS + amount
+      const newStakingRPS = (state.stakingRPS || 0) + amount
 
       // Update both balances in database
-      const response = await fetch('/api/users/balance', {
-        method: 'PUT',
+      const response = await fetch('/api/users/stake', {  // New endpoint for staking
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           username,
+          amount,
           rpsCoins: newRPSBalance,
-          stakingRPS: newStakingRPS
+          stakingRPS: newStakingRPS,
+          duration: stakingPackage.days,
+          apr: stakingPackage.apr,
+          penalty: stakingPackage.penalty
         })
       })
 
@@ -904,16 +908,7 @@ export default function Game() {
         ...prev,
         rpsCoins: data.user.rpsCoins,
         stakingRPS: data.user.stakingRPS,
-        stakedAmounts: [
-          ...prev.stakedAmounts,
-          {
-            amount,
-            startDate: new Date().toISOString(),
-            duration: stakingPackage.days,
-            apr: stakingPackage.apr,
-            penalty: stakingPackage.penalty
-          }
-        ],
+        stakedAmounts: data.user.stakingRecords || [],  // Use records from database
         stakingDialogOpen: false,
         selectedStakingPackage: null,
         stakingAmount: ''

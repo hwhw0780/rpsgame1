@@ -24,4 +24,56 @@ export async function GET(request: Request) {
       { status: 500 }
     )
   }
+}
+
+export async function POST(request: Request) {
+  try {
+    const data = await request.json()
+    const { username, amount, rpsCoins, stakingRPS, duration, apr, penalty } = data
+
+    const user = await prisma.user.findUnique({
+      where: { username },
+      include: { stakingRecords: true }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
+    }
+
+    // Update user and create staking record in a transaction
+    const result = await prisma.$transaction([
+      prisma.user.update({
+        where: { username },
+        data: {
+          rpsCoins,
+          stakingRPS
+        }
+      }),
+      prisma.stakingRecord.create({
+        data: {
+          userId: user.id,
+          amount,
+          duration,
+          apr,
+          penalty
+        }
+      })
+    ])
+
+    const updatedUser = await prisma.user.findUnique({
+      where: { username },
+      include: { stakingRecords: true }
+    })
+
+    return NextResponse.json({ user: updatedUser })
+  } catch (error) {
+    console.error('Error staking:', error)
+    return NextResponse.json(
+      { error: 'Failed to stake' },
+      { status: 500 }
+    )
+  }
 } 
