@@ -655,7 +655,7 @@ export default function Game() {
     const remainingDays = state.stakedAmounts.map(stake => {
       const endDate = new Date(stake.startDate);
       endDate.setDate(endDate.getDate() + stake.duration);
-      return Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      return Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));  // Fixed missing parenthesis
     });
     
     return Math.max(...remainingDays);
