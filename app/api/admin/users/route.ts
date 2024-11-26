@@ -9,6 +9,8 @@ export async function GET() {
         rpsCoins: true,
         stakingRPS: true,
         usdtBalance: true,
+        eRPS: true,
+        withdrawableERPS: true,
         role: true,
         createdAt: true
       }

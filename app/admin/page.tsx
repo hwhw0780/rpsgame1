@@ -13,6 +13,7 @@ interface UserData {
   rpsCoins: number
   usdtBalance: number
   eRPS: number
+  stakingRPS: number
   withdrawableERPS: number
 }
 
@@ -27,6 +28,7 @@ export default function AdminPage() {
     rpsCoins: 0,
     usdtBalance: 0,
     eRPS: 0,
+    stakingRPS: 0,
     withdrawableERPS: 0
   })
   const [username, setUsername] = useState<string>('')
@@ -123,6 +125,7 @@ export default function AdminPage() {
         rpsCoins: 0,
         usdtBalance: 0,
         eRPS: 0,
+        stakingRPS: 0,
         withdrawableERPS: 0
       })
       setShowCreateForm(false)
@@ -216,6 +219,22 @@ export default function AdminPage() {
                     type="number"
                     value={newUser.usdtBalance}
                     onChange={(e) => setNewUser(prev => ({ ...prev, usdtBalance: Number(e.target.value) }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">eRPS Balance</Label>
+                  <Input
+                    type="number"
+                    value={newUser.eRPS}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, eRPS: Number(e.target.value) }))}
+                  />
+                </div>
+                <div>
+                  <Label className="text-white">Staking RPS</Label>
+                  <Input
+                    type="number"
+                    value={newUser.stakingRPS}
+                    onChange={(e) => setNewUser(prev => ({ ...prev, stakingRPS: Number(e.target.value) }))}
                   />
                 </div>
                 <div>
