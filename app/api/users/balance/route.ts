@@ -16,17 +16,6 @@ export async function PUT(request: Request) {
           ...(typeof withdrawableERPS === 'number' && { withdrawableERPS }),
           ...(typeof stakingRPS === 'number' && { stakingRPS }),
           ...(typeof dailyRewards === 'number' && { dailyRewards })
-        },
-        select: {
-          id: true,
-          username: true,
-          rpsCoins: true,
-          usdtBalance: true,
-          eRPS: true,
-          withdrawableERPS: true,
-          stakingRPS: true,
-          dailyRewards: true,
-          role: true
         }
       })
 
