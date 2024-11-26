@@ -590,8 +590,8 @@ export default function Game() {
           setState(prev => ({
             ...prev,
             gameResult: result,
-            eRPS: data.user.eRPS,
-            withdrawableERPS: data.user.withdrawableERPS,
+            eRPS: data.user.eRPS || 0,  // Add default value
+            withdrawableERPS: data.user.withdrawableERPS || 0,  // Add default value
             gameMode: 'result',
             gamesPlayed: prev.gamesPlayed + 1
           }))
