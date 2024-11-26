@@ -57,6 +57,12 @@ interface CurrencyRate {
   history: { time: string; rate: number }[]
 }
 
+// Add these types at the top with other types
+type Card = {
+  suit: 'hearts' | 'diamonds' | 'clubs' | 'spades'
+  value: number | 'J' | 'Q' | 'K' | 'A'
+}
+
 interface GameState {
   gameMode: string
   pvpSegment: PVPSegment | null
@@ -114,6 +120,15 @@ interface GameState {
   estimatedQueueTime: number | null
   opponentFound: boolean
   choiceTimeLeft: number | null
+  cards21: {
+    player: Card[]
+    bot: Card[]
+    deck: Card[]
+  }
+  points21: {
+    player: number
+    bot: number
+  }
 }
 
 const generateGameNo = () => {
@@ -352,7 +367,16 @@ export default function Game() {
     unstakeDialogOpen: false,
     estimatedQueueTime: null,
     opponentFound: false,
-    choiceTimeLeft: null
+    choiceTimeLeft: null,
+    cards21: {
+      player: [],
+      bot: [],
+      deck: []
+    },
+    points21: {
+      player: 0,
+      bot: 0
+    }
   })
 
   // Add this near the top of your component
@@ -469,11 +493,16 @@ export default function Game() {
     setTimeout(() => clearInterval(timer), actualTime * 1000)
   }
 
+  // Add this state
+  const [selectedGame, setSelectedGame] = useState<'none' | 'rps' | '21points'>('none')
+
+  // Update handlePVB function
   const handlePVB = () => {
+    setSelectedGame('none') // Reset game selection
     setState(prev => ({
       ...prev,
-      gameMode: 'betting',
-      result: "Place your bet!",
+      gameMode: 'game_select',
+      result: "Select a game to play!",
       playerChoice: null,
       botChoice: null,
       gameResult: null,
@@ -626,7 +655,7 @@ export default function Game() {
     const remainingDays = state.stakedAmounts.map(stake => {
       const endDate = new Date(stake.startDate);
       endDate.setDate(endDate.getDate() + stake.duration);
-      return Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      return Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     });
     
     return Math.max(...remainingDays);
@@ -779,6 +808,296 @@ export default function Game() {
     network: 'TRC20',  // Default network
     amount: ''
   })
+
+  // Add 21 Points game UI
+  {state.gameMode === '21points_betting' && (
+    <div className="space-y-4">
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-bold text-emerald-400 mb-4">21 Points Rules</h3>
+        <div className="text-sm text-gray-400 space-y-2">
+          <p>• Both player and bot must draw until reaching 16 points</p>
+          <p>• Maximum 5 cards per player</p>
+          <p>• Closest to 21 without going over wins</p>
+          <p>• Ace = 1 or 11, Face cards = 10</p>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            value={state.betAmount}
+            onChange={(e) => setState(prev => ({ ...prev, betAmount: Number(e.target.value) }))}
+            className="w-32 text-center"
+            min={1}
+            max={state.eRPS}
+          />
+          <span className="text-gray-400">eRPS</span>
+        </div>
+
+        <div className="flex gap-2">
+          <Button
+            onClick={() => handleBet21Points()}
+            className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700"
+          >
+            Place Bet
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setState(prev => ({ ...prev, gameMode: 'game_select' }))}
+          >
+            Back
+          </Button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  // Add this function to calculate card points
+  const getCardPoints = (card: Card): number => {
+    if (card.value === 'A') return 11  // We'll handle Ace=1 case in total calculation
+    if (typeof card.value === 'string') return 10  // J, Q, K
+    return card.value
+  }
+
+  // Add this function to calculate total points
+  const calculatePoints = (cards: Card[]): number => {
+    let total = 0
+    let aces = 0
+
+    // First count non-aces
+    cards.forEach(card => {
+      if (card.value === 'A') {
+        aces++
+      } else {
+        total += getCardPoints(card)
+      }
+    })
+
+    // Then add aces
+    while (aces > 0) {
+      if (total + 11 <= 21) {
+        total += 11
+      } else {
+        total += 1
+      }
+      aces--
+    }
+
+    return total
+  }
+
+  // Add function to create and shuffle deck
+  const createDeck = (): Card[] => {
+    const suits = ['hearts', 'diamonds', 'clubs', 'spades'] as const
+    const values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 'J', 'Q', 'K', 'A'] as const
+    const deck: Card[] = []
+
+    suits.forEach(suit => {
+      values.forEach(value => {
+        deck.push({ suit, value })
+      })
+    })
+
+    // Shuffle deck
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[deck[i], deck[j]] = [deck[j], deck[i]]
+    }
+
+    return deck
+  }
+
+  // Add handleBet21Points function
+  const handleBet21Points = () => {
+    if (state.betAmount <= 0 || state.betAmount > state.eRPS) {
+      toast({
+        title: "Invalid bet amount",
+        description: `Please enter a valid bet amount (1-${state.eRPS} eRPS)`,
+        variant: "destructive"
+      })
+      return
+    }
+
+    const deck = createDeck()
+    const playerCards = [deck.pop()!, deck.pop()!]
+    const botCards = [deck.pop()!, deck.pop()!]
+
+    setState(prev => ({
+      ...prev,
+      gameMode: '21points_game',
+      currentGameNo: generateGameNo(),
+      opponent: getRandomBotName(),
+      cards21: {
+        player: playerCards,
+        bot: botCards,
+        deck: deck
+      },
+      points21: {
+        player: calculatePoints(playerCards),
+        bot: calculatePoints(botCards)
+      },
+      eRPS: prev.eRPS - prev.betAmount
+    }))
+  }
+
+  // Add this section after other game mode sections
+  {state.gameMode === '21points_game' && (
+    <div className="space-y-6">
+      <div className="text-center space-y-2">
+        <div className="text-gray-400 font-mono">
+          Game No: {state.currentGameNo}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-8">
+        {/* Bot's Cards */}
+        <div className="text-center space-y-4">
+          <div className="text-xl text-red-400">{state.opponent}</div>
+          <div className="flex justify-center gap-2">
+            {state.cards21.bot.map((card, index) => (
+              <div 
+                key={index}
+                className="w-16 h-24 bg-gradient-to-br from-red-600/20 to-red-800/20 rounded-lg border border-red-500/20 flex items-center justify-center"
+              >
+                <div className="text-center">
+                  <div className={`text-2xl ${['hearts', 'diamonds'].includes(card.suit) ? 'text-red-500' : 'text-white'}`}>
+                    {card.value}
+                  </div>
+                  <div className={`text-sm ${['hearts', 'diamonds'].includes(card.suit) ? 'text-red-400' : 'text-gray-400'}`}>
+                    {card.suit}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-lg text-red-400">
+            Points: {state.points21.bot}
+          </div>
+        </div>
+
+        {/* Player's Cards */}
+        <div className="text-center space-y-4">
+          <div className="text-xl text-blue-400">Your Cards</div>
+          <div className="flex justify-center gap-2">
+            {state.cards21.player.map((card, index) => (
+              <div 
+                key={index}
+                className="w-16 h-24 bg-gradient-to-br from-blue-600/20 to-blue-800/20 rounded-lg border border-blue-500/20 flex items-center justify-center"
+              >
+                <div className="text-center">
+                  <div className={`text-2xl ${['hearts', 'diamonds'].includes(card.suit) ? 'text-red-500' : 'text-white'}`}>
+                    {card.value}
+                  </div>
+                  <div className={`text-sm ${['hearts', 'diamonds'].includes(card.suit) ? 'text-red-400' : 'text-gray-400'}`}>
+                    {card.suit}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-lg text-blue-400">
+            Points: {state.points21.player}
+          </div>
+        </div>
+
+        {/* Game Controls */}
+        <div className="flex justify-center gap-4">
+          <Button
+            onClick={handleDraw21}
+            disabled={state.cards21.player.length >= 5 || state.points21.player > 21}
+            className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700"
+          >
+            Draw Card
+          </Button>
+          <Button
+            onClick={handleStand21}
+            disabled={state.points21.player < 16}
+            className={`bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 ${
+              state.points21.player < 16 ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            Stand {state.points21.player < 16 ? `(Need ${16 - state.points21.player} more points)` : ''}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  // Add these handler functions
+  const handleDraw21 = () => {
+    if (state.cards21.player.length >= 5 || state.points21.player > 21) return
+
+    const newCard = state.cards21.deck.pop()!
+    const newPlayerCards = [...state.cards21.player, newCard]
+    const newPlayerPoints = calculatePoints(newPlayerCards)
+
+    setState(prev => ({
+      ...prev,
+      cards21: {
+        ...prev.cards21,
+        player: newPlayerCards,
+        deck: prev.cards21.deck
+      },
+      points21: {
+        ...prev.points21,
+        player: newPlayerPoints
+      }
+    }))
+
+    // If player busts, automatically end the game
+    if (newPlayerPoints > 21) {
+      handleStand21()
+    }
+  }
+
+  const handleStand21 = () => {
+    if (state.points21.player < 16) return
+
+    let botCards = [...state.cards21.bot]
+    let deck = [...state.cards21.deck]
+    
+    // Bot draws until 16 points or 5 cards
+    while (calculatePoints(botCards) < 16 && botCards.length < 5) {
+      const newCard = deck.pop()!
+      botCards.push(newCard)
+    }
+
+    const playerPoints = state.points21.player
+    const botPoints = calculatePoints(botCards)
+    
+    // Determine winner
+    let result: 'win' | 'lose' | 'draw'
+    if (playerPoints > 21) {
+      result = 'lose'
+    } else if (botPoints > 21) {
+      result = 'win'
+    } else if (playerPoints > botPoints) {
+      result = 'win'
+    } else if (botPoints > playerPoints) {
+      result = 'lose'
+    } else {
+      result = 'draw'
+    }
+
+    setState(prev => ({
+      ...prev,
+      cards21: {
+        ...prev.cards21,
+        bot: botCards,
+        deck
+      },
+      points21: {
+        ...prev.points21,
+        bot: botPoints
+      },
+      gameMode: 'result',
+      gameResult: result,
+      eRPS: result === 'win' ? prev.eRPS + prev.betAmount * 2 :
+            result === 'draw' ? prev.eRPS + prev.betAmount :
+            prev.eRPS
+    }))
+  }
 
   return (
     <div className="min-h-screen bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900 text-gray-100 p-2 sm:p-4 md:p-8">
@@ -1158,7 +1477,7 @@ export default function Game() {
                   window.open('https://t.me/yourtelegrambot', '_blank')
                 }}
               >
-                Have question? Contact us!
+                Have question?
               </Button>
             </div>
 
@@ -2440,7 +2759,7 @@ export default function Game() {
                 className="text-gray-400 hover:text-gray-300"
                 onClick={() => setState(prev => ({ ...prev, unstakeDialogOpen: false }))}
               >
-                ���
+                ✕
               </Button>
             </div>
 
@@ -2758,6 +3077,90 @@ export default function Game() {
                   Customer Service
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* New game selection UI */}
+      {state.gameMode === 'game_select' && (
+        <div className="space-y-4">
+          <div className="text-center text-xl font-bold text-purple-400 mb-6">
+            Choose Your Game
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Button
+              onClick={() => {
+                setState(prev => ({
+                  ...prev,
+                  gameMode: 'betting',
+                  result: "Place your bet!",
+                }))
+                setSelectedGame('rps')
+              }}
+              className="h-32 flex flex-col gap-2 bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 border border-purple-400/20"
+            >
+              <span className="text-2xl font-bold">Rock Paper Scissors</span>
+              <span className="text-sm text-gray-300">Classic RPS Game</span>
+            </Button>
+
+            <Button
+              onClick={() => {
+                setState(prev => ({
+                  ...prev,
+                  gameMode: '21points_betting',
+                  result: "Place your bet!",
+                }))
+                setSelectedGame('21points')
+              }}
+              className="h-32 flex flex-col gap-2 bg-gradient-to-br from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 border border-emerald-400/20"
+            >
+              <span className="text-2xl font-bold">21 Points</span>
+              <span className="text-sm text-gray-300">Card Game</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* 21 Points game UI */}
+      {state.gameMode === '21points_betting' && (
+        <div className="space-y-4">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-bold text-emerald-400 mb-4">21 Points Rules</h3>
+            <div className="text-sm text-gray-400 space-y-2">
+              <p>• Both player and bot must draw until reaching 16 points</p>
+              <p>• Maximum 5 cards per player</p>
+              <p>• Closest to 21 without going over wins</p>
+              <p>• Ace = 1 or 11, Face cards = 10</p>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={state.betAmount}
+                onChange={(e) => setState(prev => ({ ...prev, betAmount: Number(e.target.value) }))}
+                className="w-32 text-center"
+                min={1}
+                max={state.eRPS}
+              />
+              <span className="text-gray-400">eRPS</span>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={() => handleBet21Points()}
+                className="bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700"
+              >
+                Place Bet
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setState(prev => ({ ...prev, gameMode: 'game_select' }))}
+              >
+                Back
+              </Button>
             </div>
           </div>
         </div>
