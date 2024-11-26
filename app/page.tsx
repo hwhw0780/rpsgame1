@@ -373,11 +373,21 @@ export default function Game() {
           const currentUser = data.users.find((u: any) => u.username === username)
           
           if (currentUser) {
-            setState(prev => ({
-              ...prev,
-              rpsCoins: currentUser.rpsCoins || 0,
-              usdtBalance: currentUser.usdtBalance || 0  // Make sure this is included
-            }))
+            // Only update if values are different to prevent overwriting recent changes
+            setState(prev => {
+              // Only update if the values are significantly different
+              const shouldUpdate = 
+                Math.abs(currentUser.rpsCoins - prev.rpsCoins) > 1 ||
+                Math.abs(currentUser.usdtBalance - prev.usdtBalance) > 1 ||
+                Math.abs(currentUser.eRPS - prev.eRPS) > 1
+
+              return shouldUpdate ? {
+                ...prev,
+                rpsCoins: currentUser.rpsCoins || 0,
+                usdtBalance: currentUser.usdtBalance || 0,
+                eRPS: currentUser.eRPS || 0
+              } : prev
+            })
           }
         }
       } catch (error) {
@@ -387,8 +397,8 @@ export default function Game() {
 
     fetchUserData()
     
-    // Set up polling to keep data in sync
-    const interval = setInterval(fetchUserData, 3000)  // Check every 3 seconds
+    // Set up polling with a longer interval
+    const interval = setInterval(fetchUserData, 5000)  // Changed to 5 seconds
     return () => clearInterval(interval)
   }, [])
 
