@@ -1,17 +1,9 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { type NextRequest } from 'next/server'
-
-type Props = {
-  params: {
-    username: string
-  }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
 
 export async function GET(
-  request: NextRequest,
-  { params }: Props
+  request: Request,
+  { params }: { params: { username: string } }
 ) {
   try {
     const user = await prisma.user.findUnique({
