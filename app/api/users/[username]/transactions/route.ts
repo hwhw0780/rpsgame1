@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+interface Context {
+  params: { username: string }
+}
+
 export async function GET(
-  request: Request,
-  { params }: { params: { username: string } }
+  _request: Request,
+  context: Context
 ) {
   try {
     const user = await prisma.user.findUnique({
-      where: { username: params.username },
+      where: { username: context.params.username },
       include: {
         transactions: {
           orderBy: { createdAt: 'desc' },
