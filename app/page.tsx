@@ -521,51 +521,63 @@ export default function Game() {
     setState(prev => ({
       ...prev,
       playerChoice: choice,
-      eRPS: prev.eRPS - prev.betAmount
+      eRPS: prev.eRPS - prev.betAmount,
+      gameMode: 'battling',  // Change to battling mode first
+      botChoice: null  // Reset bot choice
     }))
 
     const bot = getRandomChoice()
     const result = determineWinner(choice, bot)
-    
+
     try {
       const storedUser = localStorage.getItem('user')
       if (!storedUser) return
       const { username } = JSON.parse(storedUser)
 
-      let newERPSBalance = state.eRPS - state.betAmount // Start with current balance minus bet
+      let newERPSBalance = state.eRPS - state.betAmount
       if (result === 'win') {
         newERPSBalance += state.betAmount * 2
       } else if (result === 'draw') {
         newERPSBalance += state.betAmount
       }
 
-      // Update balance in database
-      const response = await fetch('/api/users/balance', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          username,
-          eRPS: newERPSBalance
-        })
-      })
+      // Show bot's choice after 2 seconds
+      setTimeout(() => {
+        setState(prev => ({
+          ...prev,
+          botChoice: bot
+        }))
 
-      if (!response.ok) {
-        throw new Error('Failed to update balance')
-      }
+        // Show result after another 2 seconds
+        setTimeout(async () => {
+          // Update balance in database
+          const response = await fetch('/api/users/balance', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              username,
+              eRPS: newERPSBalance
+            })
+          })
 
-      const data = await response.json()
-      
-      // Update state with server response
-      setState(prev => ({
-        ...prev,
-        botChoice: bot,
-        gameResult: result,
-        eRPS: data.user.eRPS,
-        gameMode: 'result',
-        gamesPlayed: prev.gamesPlayed + 1
-      }))
+          if (!response.ok) {
+            throw new Error('Failed to update balance')
+          }
+
+          const data = await response.json()
+          
+          // Update state with server response
+          setState(prev => ({
+            ...prev,
+            gameResult: result,
+            eRPS: data.user.eRPS,
+            gameMode: 'result',
+            gamesPlayed: prev.gamesPlayed + 1
+          }))
+        }, 2000)
+      }, 2000)
     } catch (error) {
       toast({
         title: "Error",
